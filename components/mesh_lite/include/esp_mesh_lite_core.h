@@ -198,6 +198,8 @@ void esp_mesh_lite_set_mesh_id(uint8_t mesh_id, bool force_update_nvs);
  */
 esp_err_t esp_mesh_lite_set_allowed_level(uint8_t level);
 
+esp_err_t esp_mesh_lite_set_router_ssid(const char* router_ssid);
+
 /**
  * @brief  Set which level this node is not allowed to be used as
  * 
@@ -216,7 +218,7 @@ esp_err_t esp_mesh_lite_set_disallowed_level(uint8_t level);
  * @param[in]  conf
  *
  */
-esp_err_t esp_mesh_lite_set_router_config(wifi_sta_config_t *conf);
+esp_err_t esp_mesh_lite_update_router_config(wifi_sta_config_t *conf);
 
 /**
  * @brief  Whether to allow other nodes to join the mesh network.

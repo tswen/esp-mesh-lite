@@ -384,7 +384,7 @@ static void event_handler(void* arg, esp_event_base_t event_base,
                          (const char *) wifi_sta_cfg->ssid,
                          (const char *) wifi_sta_cfg->password);
 #if CONFIG_MESH_LITE_ENABLE
-                esp_mesh_lite_set_router_config(wifi_sta_cfg);
+                esp_mesh_lite_update_router_config(wifi_sta_cfg);
                 esp_mesh_lite_connect();
 #else
                 esp_wifi_set_storage(WIFI_STORAGE_FLASH);

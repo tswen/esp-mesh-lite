@@ -171,16 +171,14 @@ static esp_err_t esp_storage_init(void)
 
 static esp_err_t wifi_init(void)
 {
+#if defined(CONFIG_BRIDGE_EXTERNAL_NETIF_STATION)
     // Station
-    wifi_config_t wifi_config = {
-        .sta = {
-            .ssid = CONFIG_ROUTER_SSID,
-            .password = CONFIG_ROUTER_PASSWORD,
-        },
-    };
-    esp_bridge_wifi_set(WIFI_MODE_STA, (char *)wifi_config.sta.ssid, (char *)wifi_config.sta.password, NULL);
+    esp_bridge_wifi_set(WIFI_MODE_STA, CONFIG_ROUTER_SSID, CONFIG_ROUTER_PASSWORD, NULL);
+#endif
 
+#if defined(CONFIG_BRIDGE_DATA_FORWARDING_NETIF_SOFTAP)
     // Softap
+    wifi_config_t wifi_config;
     memset(&wifi_config, 0x0, sizeof(wifi_config_t));
     size_t softap_ssid_len = sizeof(wifi_config.ap.ssid);
     if (esp_mesh_lite_get_softap_ssid_from_nvs((char *)wifi_config.ap.ssid, &softap_ssid_len) != ESP_OK) {
@@ -191,7 +189,7 @@ static esp_err_t wifi_init(void)
         strlcpy((char *)wifi_config.ap.password, CONFIG_BRIDGE_SOFTAP_PASSWORD, sizeof(wifi_config.ap.password));
     }
     esp_bridge_wifi_set(WIFI_MODE_AP, (char *)wifi_config.ap.ssid, (char *)wifi_config.ap.password, NULL);
-
+#endif
     return ESP_OK;
 }
 
@@ -213,6 +211,12 @@ void app_main()
 
     esp_mesh_lite_config_t mesh_lite_config = ESP_MESH_LITE_DEFAULT_INIT();
     esp_mesh_lite_init(&mesh_lite_config);
+
+#ifndef CONFIG_BRIDGE_EXTERNAL_NETIF_STATION
+#if defined(CONFIG_BRIDGE_EXTERNAL_NETIF_ETHERNET) || defined(CONFIG_BRIDGE_EXTERNAL_NETIF_MODEM)
+    esp_mesh_lite_set_router_ssid(CONFIG_ROUTER_SSID);
+#endif
+#endif
 
     /**
      * @breif Create handler
