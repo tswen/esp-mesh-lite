@@ -19,96 +19,12 @@
 #include "esp_bridge.h"
 #include "esp_mesh_lite.h"
 
-#define PAYLOAD_LEN       (1456) /**< Max payload size(in bytes) */
+#include "led_indicator.h"
+#include "led_indicator_blink_default.h"
+#include "usbh_modem_board.h"
+#include "usbh_modem_wifi.h"
 
-static int g_sockfd    = -1;
 static const char *TAG = "local_control";
-
-/**
- * @brief Create a tcp client
- */
-static int socket_tcp_client_create(const char *ip, uint16_t port)
-{
-    ESP_LOGI(TAG, "Create a tcp client, ip: %s, port: %d", ip, port);
-
-    esp_err_t ret = ESP_OK;
-    int sockfd    = -1;
-    struct ifreq iface;
-    memset(&iface, 0x0, sizeof(iface));
-    struct sockaddr_in server_addr = {
-        .sin_family = AF_INET,
-        .sin_port = htons(port),
-        .sin_addr.s_addr = inet_addr(ip),
-    };
-
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) {
-        ESP_LOGE(TAG, "socket create, sockfd: %d", sockfd);
-        goto ERR_EXIT;
-    } 
-
-    esp_netif_get_netif_impl_name(esp_netif_get_handle_from_ifkey("WIFI_STA_DEF"), iface.ifr_name);
-    if (setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,  &iface, sizeof(struct ifreq)) != 0) {
-        ESP_LOGI(TAG, "Bind [sock=%d] to interface %s fail", sockfd, iface.ifr_name);
-    }
-
-    ret = connect(sockfd, (struct sockaddr *)&server_addr, sizeof(struct sockaddr_in));
-    if (ret < 0) {
-        ESP_LOGE(TAG, "socket connect, ret: %d, ip: %s, port: %d",
-                   ret, ip, port);
-        goto ERR_EXIT;
-    }
-    return sockfd;
-
-ERR_EXIT:
-
-    if (sockfd != -1) {
-        close(sockfd);
-    }
-
-    return -1;
-}
-
-void tcp_client_write_task(void *arg)
-{
-    size_t size        = 0;
-    int count          = 0;
-    char *data         = NULL;
-    esp_err_t ret      = ESP_OK;
-    uint8_t sta_mac[6] = {0};
-
-    esp_wifi_get_mac(ESP_IF_WIFI_STA, sta_mac);
-
-    ESP_LOGI(TAG, "TCP client write task is running");
-
-    while (1) {
-        if (g_sockfd == -1) {
-            vTaskDelay(500 / portTICK_PERIOD_MS);
-            continue;
-        }
-
-        vTaskDelay(3000 / portTICK_PERIOD_MS);
-
-        size = asprintf(&data, "{\"src_addr\": \"" MACSTR "\",\"data\": \"Hello TCP Server!\",\"count\": %d}",
-                        MAC2STR(sta_mac), count++);
-
-        ESP_LOGD(TAG, "TCP write, size: %d, data: %s", size, data);
-        ret = write(g_sockfd, data, size);
-        free(data);
-
-        if (ret <= 0) {
-            ESP_LOGE(TAG, "<%s> TCP write", strerror(errno));
-            continue;
-        }
-    }
-
-    ESP_LOGI(TAG, "TCP client write task is exit");
-
-    close(g_sockfd);
-    g_sockfd = -1;
-    free(data);
-    vTaskDelete(NULL);
-}
 
 /**
  * @brief Timed printing system information
@@ -133,25 +49,6 @@ static void print_system_info_timercb(TimerHandle_t timer)
 
     for (int i = 0; i < wifi_sta_list.num; i++) {
         ESP_LOGI(TAG, "Child mac: " MACSTR, MAC2STR(wifi_sta_list.sta[i].mac));
-    }
-}
-
-static void ip_event_sta_got_ip_handler(void *arg, esp_event_base_t event_base,
-                                        int32_t event_id, void *event_data)
-{
-    if (g_sockfd != -1) {
-        close(g_sockfd);
-        g_sockfd = -1;
-    }
-
-    g_sockfd = socket_tcp_client_create(CONFIG_SERVER_IP, CONFIG_SERVER_PORT);
-
-    static bool tcp_task = false;
-
-    if (!tcp_task) {
-        xTaskCreate(tcp_client_write_task, "tcp_client_write_task", 4 * 1024,
-                    NULL, 5, NULL);
-        tcp_task = true;
     }
 }
 
@@ -193,6 +90,110 @@ static esp_err_t wifi_init(void)
     return ESP_OK;
 }
 
+#define LED_RED_SYSTEM_GPIO                 CONFIG_EXAMPLE_LED_RED_SYSTEM_GPIO
+#define LED_BLUE_WIFI_GPIO                  CONFIG_EXAMPLE_LED_BLUE_WIFI_GPIO
+#define LED_GREEN_4GMODEM_GPIO              CONFIG_EXAMPLE_LED_GREEN_4GMODEM_GPIO
+#define LED_ACTIVE_LEVEL                    1
+
+static led_indicator_handle_t s_led_system_handle = NULL;
+static led_indicator_handle_t s_led_wifi_handle = NULL;
+static led_indicator_handle_t s_led_4g_handle = NULL;
+
+static void _led_indicator_init()
+{
+    led_indicator_gpio_config_t led_indicator_gpio_config = {
+        .is_active_level_high = LED_ACTIVE_LEVEL,
+    };
+
+    led_indicator_config_t led_config = {
+        .led_indicator_gpio_config = &led_indicator_gpio_config,
+        .mode = LED_GPIO_MODE,
+    };
+
+    if (LED_RED_SYSTEM_GPIO) {
+        led_indicator_gpio_config.gpio_num = LED_RED_SYSTEM_GPIO;
+        s_led_system_handle = led_indicator_create(&led_config);
+        assert(s_led_system_handle != NULL);
+    }
+    if (LED_BLUE_WIFI_GPIO) {
+        led_indicator_gpio_config.gpio_num = LED_BLUE_WIFI_GPIO;
+        s_led_wifi_handle = led_indicator_create(&led_config);
+        assert(s_led_wifi_handle != NULL);
+        led_indicator_stop(s_led_wifi_handle, BLINK_CONNECTED);
+        led_indicator_start(s_led_wifi_handle, BLINK_CONNECTING);
+    }
+    if (LED_GREEN_4GMODEM_GPIO) {
+        led_indicator_gpio_config.gpio_num = LED_GREEN_4GMODEM_GPIO;
+        s_led_4g_handle = led_indicator_create(&led_config);
+        assert(s_led_4g_handle != NULL);
+        led_indicator_stop(s_led_4g_handle, BLINK_CONNECTED);
+        led_indicator_start(s_led_4g_handle, BLINK_CONNECTING);
+    }
+}
+
+static void on_modem_event(void *arg, esp_event_base_t event_base,
+                           int32_t event_id, void *event_data)
+{
+    if (event_base == MODEM_BOARD_EVENT) {
+        if ( event_id == MODEM_EVENT_SIMCARD_DISCONN) {
+            ESP_LOGW(TAG, "Modem Board Event: SIM Card disconnected");
+            led_indicator_start(s_led_system_handle, BLINK_CONNECTED);
+        } else if ( event_id == MODEM_EVENT_SIMCARD_CONN) {
+            ESP_LOGI(TAG, "Modem Board Event: SIM Card Connected");
+            led_indicator_stop(s_led_system_handle, BLINK_CONNECTED);
+        } else if ( event_id == MODEM_EVENT_DTE_DISCONN) {
+            ESP_LOGW(TAG, "Modem Board Event: USB disconnected");
+            led_indicator_start(s_led_system_handle, BLINK_CONNECTING);
+        } else if ( event_id == MODEM_EVENT_DTE_CONN) {
+            ESP_LOGI(TAG, "Modem Board Event: USB connected");
+            led_indicator_stop(s_led_system_handle, BLINK_CONNECTED);
+            led_indicator_stop(s_led_system_handle, BLINK_CONNECTING);
+        } else if ( event_id == MODEM_EVENT_DTE_RESTART) {
+            ESP_LOGW(TAG, "Modem Board Event: Hardware restart");
+            led_indicator_start(s_led_system_handle, BLINK_CONNECTED);
+        } else if ( event_id == MODEM_EVENT_DTE_RESTART_DONE) {
+            ESP_LOGI(TAG, "Modem Board Event: Hardware restart done");
+            led_indicator_stop(s_led_system_handle, BLINK_CONNECTED);
+        } else if ( event_id == MODEM_EVENT_NET_CONN) {
+            ESP_LOGI(TAG, "Modem Board Event: Network connected");
+            led_indicator_start(s_led_4g_handle, BLINK_CONNECTED);
+        } else if ( event_id == MODEM_EVENT_NET_DISCONN) {
+            ESP_LOGW(TAG, "Modem Board Event: Network disconnected");
+            led_indicator_stop(s_led_4g_handle, BLINK_CONNECTED);
+        } else if ( event_id == MODEM_EVENT_WIFI_STA_CONN) {
+            ESP_LOGI(TAG, "Modem Board Event: Station connected");
+            led_indicator_start(s_led_wifi_handle, BLINK_CONNECTED);
+        } else if ( event_id == MODEM_EVENT_WIFI_STA_DISCONN) {
+            ESP_LOGW(TAG, "Modem Board Event: All stations disconnected");
+            led_indicator_stop(s_led_wifi_handle, BLINK_CONNECTED);
+        }
+    }
+}
+
+void modem_test()
+{
+    /* Initialize led indicator */
+    _led_indicator_init();
+
+    /* Waiting for modem powerup */
+    vTaskDelay(pdMS_TO_TICKS(3000));
+    ESP_LOGI(TAG, "====================================");
+    ESP_LOGI(TAG, "     ESP 4G Cat.1 Wi-Fi Router");
+    ESP_LOGI(TAG, "====================================");
+
+    /* Initialize modem board. Dial-up internet */
+    modem_config_t modem_config = MODEM_DEFAULT_CONFIG();
+    /* Modem init flag, used to control init process */
+// #ifndef CONFIG_EXAMPLE_ENTER_PPP_DURING_INIT
+    /* if Not enter ppp, modem will enter command mode after init */
+    modem_config.flags |= MODEM_FLAGS_INIT_NOT_ENTER_PPP;
+    /* if Not waiting for modem ready, just return after modem init */
+    modem_config.flags |= MODEM_FLAGS_INIT_NOT_BLOCK;
+// #endif
+    modem_config.handler = on_modem_event;
+    modem_board_init(&modem_config);
+}
+
 void app_main()
 {
     /**
@@ -209,6 +210,8 @@ void app_main()
 
     wifi_init();
 
+    modem_test();
+
     esp_mesh_lite_config_t mesh_lite_config = ESP_MESH_LITE_DEFAULT_INIT();
     esp_mesh_lite_init(&mesh_lite_config);
 
@@ -217,11 +220,6 @@ void app_main()
     esp_mesh_lite_set_router_ssid(CONFIG_ROUTER_SSID);
 #endif
 #endif
-
-    /**
-     * @breif Create handler
-     */
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &ip_event_sta_got_ip_handler, NULL, NULL));
 
     TimerHandle_t timer = xTimerCreate("print_system_info", 10000 / portTICK_PERIOD_MS,
                                        true, NULL, print_system_info_timercb);

@@ -15,3 +15,7 @@ dependencies:
     public: true
     rules:
       - if: "target in [esp32s2, esp32s3]"
+  led_indicator:
+    version: "~0.3.0"
+  iot_usbh_modem:
+    version: "0.1.*"
