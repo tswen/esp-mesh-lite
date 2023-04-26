@@ -6,7 +6,7 @@ This document provides an introduction to the Mesh-Lite protocol.
 
 ## Overview
 
-ESP-MESH-LITE is a Wi-Fi networking application of [IoT-Bridge](https://github.com/espressif/esp-iot-bridge), based on the **SoftAP + Station** mode, a set of Mesh solutions built on top of the Wi-Fi protocol. ESP-MESH-LITE allows numerous devices (henceforth referred to as nodes) spread over a large physical area (both indoors and outdoors) to be interconnected under a single WLAN (Wireless Local-Area Network). The biggest difference between ESP-MESH-LITE and [ESP-MESH](https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32/api-guides/esp-wifi-mesh.html) (also known as ESP-WIFI-MESH) is that ESP-MESH-LITE allows sub-devices in the network to independently access the external network, and the transmission information is insensitive to the parent node, which greatly reduces the difficulty to develop the application layer. ESP-MESH-LITE is self-organizing and self-healing, which means the network can be built and maintained autonomously.
+ESP-MESH-LITE is a set of Mesh solutions modeled after [IoT-Bridge](https://components.espressif.com/components/espressif/iot_bridge), based on the **SoftAP + Station** mode, and built on top of the Wi-Fi protocol. ESP-MESH-LITE allows numerous devices (henceforth referred to as nodes) spread over a large physical area (both indoors and outdoors) to be interconnected under a single WLAN (Wireless Local-Area Network). The biggest difference between ESP-MESH-LITE and [ESP-MESH](https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32/api-guides/esp-wifi-mesh.html) (also known as ESP-WIFI-MESH) is that ESP-MESH-LITE allows sub-devices in the network to independently access the external network, and the transmission information is insensitive to the parent node, which greatly reduces the difficulty to develop the application layer. ESP-MESH-LITE is self-organizing and self-healing, which means the network can be built and maintained autonomously.
 
 This ESP-MESH-LITE guide contains the following sections:
 
@@ -19,7 +19,8 @@ This ESP-MESH-LITE guide contains the following sections:
 7. [Difference between ESP-MESH-LITE and ESP-MESH](#difference-between-esp-mesh-lite-and-esp-mesh)
 8. [ESPNOW Usage Guide](#espnow-usage-guide)
 9. [Migration Guides](#migration-guides)
-10. [Further Notes](#further-notes)
+10. [ESP-MESH-LITE LAN OTA](#esp-mesh-lite-lan-ota)
+11. [Further Notes](#further-notes)
 
 ## Introduction
 
@@ -476,7 +477,114 @@ static void event_handler(void* arg, esp_event_base_t event_base,
 >
 > Except for the provisioning connection part, the rest of the network applications (Socket, MQTT, HTTP, etc.) do not need to be modified.
 
+## ESP-MESH-LITE LAN OTA
 
+### Introduction
+
+In the ESP-Mesh-Lite network, each device can independently obtain and perform OTA for new firmware directly from an external URL. However, when all devices in the Mesh network are performing OTA simultaneously, the root node and devices acting as parent nodes may experience greater pressure, resulting in a slower OTA rate for all devices.
+
+To solve this problem, you can enable the ESP-MESH-LITE LAN OTA function. Upon receiving an OTA instruction, higher-level devices will be prioritized for OTA. If lower-level devices receive OTA instructions, they will request the corresponding OTA firmware from their upper-level nodes (of course, the requested **device category** must be the same; the devices will ignore parent devices with different categories and continue to request from higher-level nodes). If there is a parent node or higher-level node with the same category and running the same requested version of firmware, the OTA process will take place between these two nodes (a parent node can provide OTA services for multiple child nodes at the same time). If the root node is unable to provide firmware that meets the conditions, the child node devices will then retrieve the pending updated firmware from the external URL.
+
+![img](./docs/_static/level3node_ota_timing_chart_en.svg)
+
+If multiple devices receive OTA instructions at the same time, the device at the highest level device will publish messages to stop the OTA process of its child nodes while carrying out OTA from the external URL. When the highest-level device completes the OTA process and restarts, the child nodes will attempt to reconnect to their parent node and initiate OTA requests again. At this point, since the parent node has successfully run the new firmware, it can perform OTA upgrades for its child nodes within the LAN. In this way, the devices in the entire network will be updated layer by layer, at a much higher rate than when all devices are requesting updates from the external URL simultaneously.
+
+![img](./docs/_static/rootnode_ota_timing_chart_en.svg)
+
+- Device Category: Device category doesn't have a fixed format and can be any string, but devices of the same type should have consistent device category values.
+- Enable ESP-Mesh-Lite LAN OTA functionality by turning on the `ESP_MESH_LITE_LAN_OTA_ENABLE` configuration option.
+
+![mesh_lite_lan_ota_config](./docs/_static/mesh_lite_lan_ota_config.png)
+
+### How to integrate Mesh-Lite LAN OTA into your own project?
+
+- Firstly, you need to have a set of procedures for a single device to independently go to an external URL for OTA, and then modify the procedures based on it.
+
+- Enable `ESP_MESH_LITE_LAN_OTA_ENABLE` in menuconfig (``Components config`` -> ``ESP Wi-Fi Mesh Lite`` -> ``Enable Mesh-Lite`` -> ``Mesh-Lite info configuration``)
+
+- Modify the single device OTA process
+
+    - After receiving the OTA instruction, make the following modifications to the device. Please refer to [app_rainmaker_ota_topic.c](https://github.com/espressif/esp-mesh-lite/blob/master/examples/rainmaker_led_light/components/app_rainmaker/app_rainmaker_ota_topic.c#L157) for details.
+
+        ```c
+        #ifdef CONFIG_ESP_MESH_LITE_LAN_OTA_ENABLE
+            if (esp_mesh_lite_get_level() > 1) {
+                /* Processing flow of child nodes. */
+                const esp_app_desc_t *app_desc;
+        #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+                app_desc = esp_app_get_description();
+        #else
+                app_desc = esp_ota_get_app_description();
+        #endif
+                ESP_LOGI(TAG, "OTA Image version for Project: %s. Expected: %s", app_desc->version, fw_version);
+                /* Check firmware version. */
+                if (!strncmp(app_desc->version, fw_version, strnlen(fw_version, sizeof(app_desc->version)))) {
+                    ESP_LOGW(TAG, "Current running version is same as the new. We will not continue the update.");
+                    esp_rmaker_ota_report_status(ota_handle, OTA_STATUS_REJECTED, "Same version received");
+                    ESP_LOGE(TAG, "image header verification failed");
+                    esp_rmaker_ota_report_status(ota_handle, OTA_STATUS_FAILED, "Image validation failed");
+                } else {
+                    /* Start executing the Mesh-Lite OTA process, where the 'filesize' is the size of the OTA firmware,
+                    * the 'fw_version' is the version of the OTA firmware, and the 'extern_url_ota_cb' is a process for
+                    * a single device to perform OTA from the outside. When child nodes cannot request the corresponding version 
+                    * of the OTA firmware from its higher-level node, it will perform OTA from an external URL 
+                    * through this callback function.
+                    */
+                    esp_mesh_lite_file_transmit_config_t transmit_config = {
+                        .type = ESP_MESH_LITE_OTA_TRANSMIT_FIRMWARE,
+                        .size = filesize,
+                        .extern_url_ota_cb = esp_mesh_lite_ota_from_extern_url,
+                    };
+                    memcpy(transmit_config.fw_version, fw_version, sizeof(transmit_config.fw_version));
+                    esp_mesh_lite_transmit_file_start(&transmit_config);
+                    ota_info = ota;
+                }
+            } else {
+                /* Root node processing flow. */
+                /* As the root node, you need to first notify the child nodes and pause their OTA process. */
+                esp_mesh_lite_ota_notify_child_node_pause();
+        #endif
+                /* Perform OTA process from external URL. */
+                if (esp_rmaker_work_queue_add_task(esp_rmaker_ota_common_cb, ota) != ESP_OK) {
+                    esp_rmaker_ota_finish_using_topics(ota);
+                }
+        #ifdef CONFIG_ESP_MESH_LITE_LAN_OTA_ENABLE
+            }
+        #endif
+        ```
+
+    - When the device is repeatedly reading the firmware to be upgraded from an external URL, add the `esp_mesh_lite_wait_ota_allow()` API. Please refer to [app_rainmaker_ota.c](https://github.com/espressif/esp-mesh-lite/blob/master/examples/rainmaker_led_light/components/app_rainmaker/app_rainmaker_ota.c#L131) for details.
+
+        ```c
+            while (1) {
+        #ifdef CONFIG_ESP_MESH_LITE_LAN_OTA_ENABLE
+                /* Check if the OTA process is allowed. If there are higher-level nodes also requesting the firmware
+                * from the external URL, the OTA process of this node will be stopped, and esp_mesh_lite_wait_ota_allow()
+                * will return ESP_FAIL. It will restart the OTA process after its parent or higher-level nodes finish
+                * requesting the firmware.
+                */
+                if (esp_mesh_lite_wait_ota_allow() != ESP_OK) {
+                    err = ESP_FAIL;
+                    break;
+                }
+        #endif
+                err = esp_https_ota_perform(https_ota_handle);
+                if (err != ESP_ERR_HTTPS_OTA_IN_PROGRESS) {
+                    break;
+                }
+                /* esp_https_ota_perform returns after every read operation which gives user the ability to
+                * monitor the status of OTA upgrade by calling esp_https_ota_get_image_len_read, which gives length of image
+                * data read so far.
+                * We are using a counter just to reduce the number of prints
+                */
+
+                count++;
+                if (count == 50) {
+                    ESP_LOGI(TAG, "Image bytes read: %d", esp_https_ota_get_image_len_read(https_ota_handle));
+                    count = 0;
+                }
+            }
+        ```
 
 ## Further Notes
 

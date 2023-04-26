@@ -72,7 +72,7 @@ menu "ESP Wi-Fi Mesh Lite"
                 help
                     The device category, such as Light, Fun.
 
-        config ESP_MESH_LITE_OTA_ENABLE
+        config ESP_MESH_LITE_LAN_OTA_ENABLE
             bool "Enable Mesh-Lite OTA"
             default n
             help
@@ -82,7 +82,7 @@ menu "ESP Wi-Fi Mesh Lite"
                 if the root node also does not have the corresponding version firmware, then the upgrade will begin from the external URL.
 
         menu "Mesh-Lite OTA"
-            depends on ESP_MESH_LITE_OTA_ENABLE
+            depends on ESP_MESH_LITE_LAN_OTA_ENABLE
             config OTA_DATA_LEN
                 int "Transmission data length of each packet"
                 default 1388

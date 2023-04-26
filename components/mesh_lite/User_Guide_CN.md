@@ -6,7 +6,7 @@
 
 ## 概述
 
-ESP-MESH-LITE 是一套建立在 Wi-Fi 协议之上的网络协议。ESP-MESH-LITE 允许分布在大范围区域内（室内和室外）的大量设备（下文称节点）在同一个 WLAN（无线局域网）中相互连接。ESP-MESH-LITE 与 [ESP-MESH](https://docs.espressif.com/projects/esp-idf/zh_CN/v5.0/esp32/api-guides/esp-wifi-mesh.html)（又称 ESP-WIFI-MESH）最大的不同是 ESP-MESH-LITE 允许组网内的子设备独立访问外部网络，传输信息对于父节点无感，大大降低了应用层开发难度，ESP-MESH-LITE 具有自组网和自修复的特性，也就是说 Mesh 网络可以自主地构建和维护。
+ESP-MESH-LITE 是以 [IoT-Bridge](https://github.com/espressif/esp-iot-bridge) 为模型，基于 **SoftAP + Station** 模式，建立在 Wi-Fi 协议之上的一套 Mesh 方案。ESP-MESH-LITE 允许分布在大范围区域内（室内和室外）的大量设备（下文称节点）在同一个 WLAN（无线局域网）中相互连接。ESP-MESH-LITE 与 [ESP-MESH](https://docs.espressif.com/projects/esp-idf/zh_CN/v5.0/esp32/api-guides/esp-wifi-mesh.html)（又称 ESP-WIFI-MESH）最大的不同是 ESP-MESH-LITE 允许组网内的子设备独立访问外部网络，传输信息对于父节点无感，大大降低了应用层开发难度，ESP-MESH-LITE 具有自组网和自修复的特性，也就是说 Mesh 网络可以自主地构建和维护。
 
 本 ESP-MESH-LITE 指南分为以下几个部分：
 
@@ -19,7 +19,8 @@ ESP-MESH-LITE 是一套建立在 Wi-Fi 协议之上的网络协议。ESP-MESH-LI
 7. [ESP-MESH-LITE 与 ESP-MESH 差异](#esp-mesh-lite-与-esp-mesh-差异)
 8. [ESPNOW 使用指南](#espnow-使用指南)
 9. [移植指南](#移植指南)
-10. [更多注意事项](#更多注意事项)
+10. [ESP-MESH-LITE LAN OTA](#esp-mesh-lite-lan-ota)
+11. [更多注意事项](#更多注意事项)
 
 ## 简介
 
@@ -479,7 +480,115 @@ static void event_handler(void* arg, esp_event_base_t event_base,
 >
 > 除了配网连接部分的修改，其余的网络应用（Socket、MQTT、HTTP 等）均不需要修改
 
+## ESP-MESH-LITE LAN OTA
 
+### 简介
+
+ESP-Mesh-Lite 组网中，每个设备都可以独立地从外部 URL 直接获取新版本固件并进行 OTA。然而，当 Mesh 组网内的所有设备同时 OTA 时，根节点以及作为父节点的设备可能会承受较大压力，从而导致所有设备的 OTA 速率变慢。
+
+为了解决这个问题，可以启用 ESP-MESH-LITE LAN OTA 功能。当设备收到 OTA 指令时，层级较高的设备会优先进行 OTA。如果层级较低的设备收到 OTA 指令，它们会向其上层节点请求对应的 OTA 固件（当然，请求的**设备品类**必须相同；其会忽略品类不同的父节点设备，并继续向更高层级的节点请求）。如果存在其父节点或更高层级节点与其品类相同且正在运行与其请求版本相同的固件，则 OTA 流程会在这两个节点之间进行（一个父节点可以同时为多个子节点提供 OTA 服务）。如果根节点也未能提供符合条件的固件，子节点设备才会去外部 URL 获取待更新固件。
+
+![img](./docs/_static/level3node_ota_timing_chart.svg)
+
+如果存在多个设备同时收到 OTA 指令的情况，最高层级的设备在向外部 URL 进行 OTA 的同时，也会向子节点发布消息以停止子节点的 OTA 流程。当最高层级设备完成 OTA 流程并重新启动后，子节点会尝试重新连接其父节点，并再次发起 OTA 请求。这时，由于父节点已成功运行新固件，其可以在局域网内为子节点进行 OTA 升级。以此类推，整个组网内的设备将逐层进行更新，其速率远高于所有设备同时向外部 URL 请求的情况。
+
+![img](./docs/_static/rootnode_ota_timing_chart.svg)
+
+- Device Category：设备品类没有固定格式，只要是字符串即可，不过对于同一类型的设备，设备品类值需要保持一致。
+
+- 打开 `ESP_MESH_LITE_LAN_OTA_ENABLE` 配置项就可以使能 ESP-Mesh-Lite LAN OTA 功能
+
+![mesh_lite_lan_ota_config](./docs/_static/mesh_lite_lan_ota_config.png)
+
+### 如何将 Mesh-Lite LAN OTA 集成到自己的项目中？
+
+- 首先，你需要有一套单个设备独立去外部 URL 去 OTA 的流程，之后再在该流程上进行修改。
+
+- 在 menuconfig 中使能 `ESP_MESH_LITE_LAN_OTA_ENABLE` （``Components config`` -> ``ESP Wi-Fi Mesh Lite`` -> ``Enable Mesh-Lite`` -> ``Mesh-Lite info configuration``）
+
+- 基于单个设备 OTA 流程进行修改
+
+    - 设备在接收到 OTA 指令之后，请做以下修改，具体请参考 [app_rainmaker_ota_topic.c](https://github.com/espressif/esp-mesh-lite/blob/master/examples/rainmaker_led_light/components/app_rainmaker/app_rainmaker_ota_topic.c#L157)。
+
+        ```c
+        #ifdef CONFIG_ESP_MESH_LITE_LAN_OTA_ENABLE
+            if (esp_mesh_lite_get_level() > 1) {
+                /* Processing flow of child nodes. */
+                const esp_app_desc_t *app_desc;
+        #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+                app_desc = esp_app_get_description();
+        #else
+                app_desc = esp_ota_get_app_description();
+        #endif
+                ESP_LOGI(TAG, "OTA Image version for Project: %s. Expected: %s", app_desc->version, fw_version);
+                /* Check firmware version. */
+                if (!strncmp(app_desc->version, fw_version, strnlen(fw_version, sizeof(app_desc->version)))) {
+                    ESP_LOGW(TAG, "Current running version is same as the new. We will not continue the update.");
+                    esp_rmaker_ota_report_status(ota_handle, OTA_STATUS_REJECTED, "Same version received");
+                    ESP_LOGE(TAG, "image header verification failed");
+                    esp_rmaker_ota_report_status(ota_handle, OTA_STATUS_FAILED, "Image validation failed");
+                } else {
+                    /* Start executing the Mesh-Lite OTA process, where the 'filesize' is the size of the OTA firmware,
+                    * the 'fw_version' is the version of the OTA firmware, and the 'extern_url_ota_cb' is a process for
+                    * a single device to perform OTA from the outside. When child nodes cannot request the corresponding version 
+                    * of the OTA firmware from its higher-level node, it will perform OTA from an external URL 
+                    * through this callback function.
+                    */
+                    esp_mesh_lite_file_transmit_config_t transmit_config = {
+                        .type = ESP_MESH_LITE_OTA_TRANSMIT_FIRMWARE,
+                        .size = filesize,
+                        .extern_url_ota_cb = esp_mesh_lite_ota_from_extern_url,
+                    };
+                    memcpy(transmit_config.fw_version, fw_version, sizeof(transmit_config.fw_version));
+                    esp_mesh_lite_transmit_file_start(&transmit_config);
+                    ota_info = ota;
+                }
+            } else {
+                /* Root node processing flow. */
+                /* As the root node, you need to first notify the child nodes and pause their OTA process. */
+                esp_mesh_lite_ota_notify_child_node_pause();
+        #endif
+                /* Perform OTA process from external URL. */
+                if (esp_rmaker_work_queue_add_task(esp_rmaker_ota_common_cb, ota) != ESP_OK) {
+                    esp_rmaker_ota_finish_using_topics(ota);
+                }
+        #ifdef CONFIG_ESP_MESH_LITE_LAN_OTA_ENABLE
+            }
+        #endif
+        ```
+
+    - 设备在从外部 URL 循环进行读取待升级固件时，增加 esp_mesh_lite_wait_ota_allow() API，具体请参考 [app_rainmaker_ota.c](https://github.com/espressif/esp-mesh-lite/blob/master/examples/rainmaker_led_light/components/app_rainmaker/app_rainmaker_ota.c#L131)。
+
+        ```c
+            while (1) {
+        #ifdef CONFIG_ESP_MESH_LITE_LAN_OTA_ENABLE
+                /* Check if the OTA process is allowed. If there are higher-level nodes also requesting the firmware
+                * from the external URL, the OTA process of this node will be stopped, and esp_mesh_lite_wait_ota_allow()
+                * will return ESP_FAIL. It will restart the OTA process after its parent or higher-level nodes finish
+                * requesting the firmware.
+                */
+                if (esp_mesh_lite_wait_ota_allow() != ESP_OK) {
+                    err = ESP_FAIL;
+                    break;
+                }
+        #endif
+                err = esp_https_ota_perform(https_ota_handle);
+                if (err != ESP_ERR_HTTPS_OTA_IN_PROGRESS) {
+                    break;
+                }
+                /* esp_https_ota_perform returns after every read operation which gives user the ability to
+                * monitor the status of OTA upgrade by calling esp_https_ota_get_image_len_read, which gives length of image
+                * data read so far.
+                * We are using a counter just to reduce the number of prints
+                */
+
+                count++;
+                if (count == 50) {
+                    ESP_LOGI(TAG, "Image bytes read: %d", esp_https_ota_get_image_len_read(https_ota_handle));
+                    count = 0;
+                }
+            }
+        ```
 
 ## 更多注意事项
 

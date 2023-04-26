@@ -154,22 +154,29 @@ static void esp_rmaker_mesh_lite_ota_url_handler(const char *topic, void *payloa
     ota->filesize = filesize;
     ota->ota_in_progress = true;
 
-#ifdef CONFIG_ESP_MESH_LITE_OTA_ENABLE
+#ifdef CONFIG_ESP_MESH_LITE_LAN_OTA_ENABLE
     if (esp_mesh_lite_get_level() > 1) {
+        /* Processing flow of child nodes. */
         const esp_app_desc_t *app_desc;
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
         app_desc = esp_app_get_description();
 #else
         app_desc = esp_ota_get_app_description();
 #endif
-        ESP_LOGI(TAG, "OTA Image version for Project: %s. Expected: %s",
-                app_desc->version, fw_version);
+        ESP_LOGI(TAG, "OTA Image version for Project: %s. Expected: %s", app_desc->version, fw_version);
+        /* Check firmware version. */
         if (!strncmp(app_desc->version, fw_version, strnlen(fw_version, sizeof(app_desc->version)))) {
             ESP_LOGW(TAG, "Current running version is same as the new. We will not continue the update.");
             esp_rmaker_ota_report_status(ota_handle, OTA_STATUS_REJECTED, "Same version received");
             ESP_LOGE(TAG, "image header verification failed");
             esp_rmaker_ota_report_status(ota_handle, OTA_STATUS_FAILED, "Image validation failed");
         } else {
+            /* Start executing the Mesh-Lite OTA process, where the 'filesize' is the size of the OTA firmware,
+             * the 'fw_version' is the version of the OTA firmware, and the 'extern_url_ota_cb' is a process for
+             * a single device to perform OTA from the outside. When child nodes cannot request the corresponding version 
+             * of the OTA firmware from its higher-level node, it will perform OTA from an external URL 
+             * through this callback function.
+             */
             esp_mesh_lite_file_transmit_config_t transmit_config = {
                 .type = ESP_MESH_LITE_OTA_TRANSMIT_FIRMWARE,
                 .size = filesize,
@@ -180,12 +187,15 @@ static void esp_rmaker_mesh_lite_ota_url_handler(const char *topic, void *payloa
             ota_info = ota;
         }
     } else {
+        /* Root node processing flow. */
+        /* As the root node, you need to first notify the child nodes and pause their OTA process. */
         esp_mesh_lite_ota_notify_child_node_pause();
 #endif
+        /* Perform OTA process from external URL. */
         if (esp_rmaker_work_queue_add_task(esp_rmaker_ota_common_cb, ota) != ESP_OK) {
             esp_rmaker_ota_finish_using_topics(ota);
         }
-#ifdef CONFIG_ESP_MESH_LITE_OTA_ENABLE
+#ifdef CONFIG_ESP_MESH_LITE_LAN_OTA_ENABLE
     }
 #endif
     return;

@@ -128,7 +128,12 @@ esp_err_t esp_rmaker_mesh_lite_ota_cb(esp_rmaker_ota_handle_t ota_handle, esp_rm
     esp_rmaker_ota_report_status(ota_handle, OTA_STATUS_IN_PROGRESS, "Downloading Firmware Image");
     int count = 0;
     while (1) {
-#ifdef CONFIG_ESP_MESH_LITE_OTA_ENABLE
+#ifdef CONFIG_ESP_MESH_LITE_LAN_OTA_ENABLE
+        /* Check if the OTA process is allowed. If there are higher-level nodes also requesting the firmware
+         * from the external URL, the OTA process of this node will be stopped, and esp_mesh_lite_wait_ota_allow()
+         * will return ESP_FAIL. It will restart the OTA process after its parent or higher-level nodes finish
+         * requesting the firmware.
+         */
         if (esp_mesh_lite_wait_ota_allow() != ESP_OK) {
             err = ESP_FAIL;
             break;
