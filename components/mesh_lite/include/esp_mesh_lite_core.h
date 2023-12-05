@@ -61,6 +61,12 @@ extern const char* ESP_MESH_LITE_EVENT;
 #define OTA_WND_DEFAULT 0
 #endif
 
+#ifdef CONFIG_LOG_COLORS
+#define LOG_COLORS CONFIG_LOG_COLORS
+#else
+#define LOG_COLORS 0
+#endif
+
 #define ESP_MESH_LITE_DEFAULT_INIT() { \
     .vendor_id = {CONFIG_MESH_LITE_VENDOR_ID_0, CONFIG_MESH_LITE_VENDOR_ID_1}, \
     .mesh_id = CONFIG_MESH_LITE_ID, \
@@ -75,7 +81,8 @@ extern const char* ESP_MESH_LITE_EVENT;
     .ota_wnd = OTA_WND_DEFAULT, \
     .softap_ssid = CONFIG_BRIDGE_SOFTAP_SSID, \
     .softap_password = CONFIG_BRIDGE_SOFTAP_PASSWORD, \
-    .device_category = CONFIG_DEVICE_CATEGORY \
+    .device_category = CONFIG_DEVICE_CATEGORY, \
+    .log_color_enable = LOG_COLORS \
 }
 
 /**
@@ -114,6 +121,7 @@ typedef struct {
     const char* softap_ssid;                /**< SoftAP SSID */
     const char* softap_password;            /**< SoftAP Password */
     const char* device_category;            /**< Device Category */
+    bool log_color_enable;                  /**< Whether to enable log color */
 } esp_mesh_lite_config_t;
 
 typedef esp_err_t (*extern_url_ota_cb_t)(void);
