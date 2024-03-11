@@ -14,6 +14,7 @@
 #include "esp_timer.h"
 #include "esp_netif_types.h"
 
+#include "app_tcp.h"
 #include "app_wifi.h"
 #include "app_espnow.h"
 #include "app_bridge.h"
@@ -115,7 +116,7 @@ void esp_now_send_group_control(uint8_t *payload, bool seq_init)
 
     xSemaphoreTake(sent_msgs_mutex, portMAX_DELAY);
     sent_msgs->retry_times = 0;
-    sent_msgs->max_retry = 2;
+    sent_msgs->max_retry = 3;
     sent_msgs->msg_len = payload_len + ESPNOW_PAYLOAD_HEAD_LEN;
     sent_msgs->sent_msg = buf;
     xSemaphoreGive(sent_msgs_mutex);
@@ -275,6 +276,19 @@ static void espnow_task(void *pvParameter)
                         }
                     }
 
+                    cJSON *restart_js = cJSON_GetObjectItem(light_js, ESPNOW_RESTART);
+                    if (restart_js) {
+                        esp_mesh_lite_erase_rtc_store();
+                        esp_restart();
+                    }
+
+                    cJSON *ip_js = cJSON_GetObjectItem(light_js, ESPNOW_IP_BROADCAST);
+                    if (ip_js) {
+                        printf("recv ip: %s\r\n", ip_js->valuestring);
+                        extern void app_rewrite_tcp_server_ip(char *ip);
+                        app_rewrite_tcp_server_ip(ip_js->valuestring);
+                    }
+
                     last_espnow_msg_mode = espnow_msg_mode;
                     time_stamp = esp_timer_get_time();
                 } else {
@@ -291,6 +305,50 @@ cleanup:
                 break;
         }
     }
+}
+
+esp_err_t app_espnow_restart_all_devices(void)
+{
+    esp_err_t ret = ESP_FAIL;
+    cJSON *object = cJSON_CreateObject();
+    cJSON *payload = cJSON_CreateObject();
+    if (object) {
+        if (payload) {
+            cJSON_AddNumberToObject(payload, ESPNOW_RESTART, 1);
+            cJSON_AddItemToObject(object, ESPNOW_DEVICE_NAME, payload);
+            char *rsp_string = cJSON_PrintUnformatted(object);
+            if (rsp_string) {
+                esp_now_send_group_control((uint8_t*)rsp_string, false);
+                free(rsp_string);
+                rsp_string = NULL;
+                ret = ESP_OK;
+            }
+        }
+        cJSON_Delete(object);
+    }
+    return ret;
+}
+
+esp_err_t app_espnow_broadcast_ip_to_all_devices(char *ip_addr)
+{
+    esp_err_t ret = ESP_FAIL;
+    cJSON *object = cJSON_CreateObject();
+    cJSON *payload = cJSON_CreateObject();
+    if (object) {
+        if (payload) {
+            cJSON_AddStringToObject(payload, ESPNOW_IP_BROADCAST, ip_addr);
+            cJSON_AddItemToObject(object, ESPNOW_DEVICE_NAME, payload);
+            char *rsp_string = cJSON_PrintUnformatted(object);
+            if (rsp_string) {
+                esp_now_send_group_control((uint8_t*)rsp_string, false);
+                free(rsp_string);
+                rsp_string = NULL;
+                ret = ESP_OK;
+            }
+        }
+        cJSON_Delete(object);
+    }
+    return ret;
 }
 
 esp_err_t app_espnow_reset_group_control(void)

@@ -151,7 +151,8 @@ esp_err_t app_light_init(void)
 
 static void push_btn_cb(void *arg)
 {
-    app_espnow_reset_group_control();
+    // app_espnow_reset_group_control();
+    app_espnow_restart_all_devices();
 }
 
 void app_driver_init()

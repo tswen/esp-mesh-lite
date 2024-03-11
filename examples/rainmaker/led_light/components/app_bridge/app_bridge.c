@@ -554,6 +554,11 @@ esp_err_t app_rmaker_enable_bridge(void)
     esp_mesh_lite_config_t mesh_lite_config = ESP_MESH_LITE_DEFAULT_INIT();
     esp_mesh_lite_init(&mesh_lite_config);
 
+    static const esp_mesh_lite_rssi_threshold_list_t rssi_level[] = {
+        {0,  -125, 10},
+    };
+    esp_err_t result = esp_mesh_lite_set_rssi_threshold(rssi_level, sizeof(rssi_level) / sizeof(esp_mesh_lite_rssi_threshold_list_t), -80);
+
     esp_mesh_lite_start();
 
     child_info_mutex = xSemaphoreCreateMutex();

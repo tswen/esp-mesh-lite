@@ -14,6 +14,8 @@
 #define ESPNOW_DEVICE_NAME               "Light"
 #define ESPNOW_GROUP_ID                  "group_id"
 #define ESPNOW_DISTRIBUTION_NETWORK      "distribution_network"
+#define ESPNOW_RESTART                   "restart"
+#define ESPNOW_IP_BROADCAST              "ip_broadcast"
 
 typedef enum espnow_msg_mode {
     ESPNOW_MSG_MODE_INVALID = 0,
@@ -37,4 +39,6 @@ typedef struct {
 esp_err_t group_control_init(void);
 esp_err_t group_control_deinit(void);
 esp_err_t app_espnow_reset_group_control(void);
+esp_err_t app_espnow_restart_all_devices(void);
+esp_err_t app_espnow_broadcast_ip_to_all_devices(char *ip_addr);
 void esp_now_send_group_control(uint8_t *payload, bool seq_init);
