@@ -25,7 +25,7 @@ static const char *TAG = "Mesh-Lite";
 
 #if CONFIG_MESH_LITE_NODE_INFO_REPORT
 
-#define MAX_RETRY  5
+#define MAX_RETRY  2
 
 typedef struct node_info_list {
     esp_mesh_lite_node_info_t* node;
@@ -67,7 +67,7 @@ static esp_err_t esp_mesh_lite_node_info_add(uint8_t level, char* mac)
                 new->node->level = level;
                 esp_event_post(ESP_MESH_LITE_EVENT, ESP_MESH_LITE_EVENT_NODE_CHANGE, new->node, sizeof(esp_mesh_lite_node_info_t), 0);
             }
-            new->ttl = (CONFIG_MESH_LITE_REPORT_INTERVAL + 10);
+            new->ttl = (CONFIG_MESH_LITE_REPORT_INTERVAL + 5);
             xSemaphoreGive(node_info_mutex);
             return ESP_ERR_DUPLICATE_ADDITION;
         }
@@ -92,7 +92,7 @@ static esp_err_t esp_mesh_lite_node_info_add(uint8_t level, char* mac)
 
     memcpy(new->node->mac, mac, MAC_MAX_LEN);
     new->node->level = level;
-    new->ttl = (CONFIG_MESH_LITE_REPORT_INTERVAL + 10);
+    new->ttl = (CONFIG_MESH_LITE_REPORT_INTERVAL + 5);
 
     new->next = node_info_list;
     node_info_list = new;

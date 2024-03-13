@@ -7,17 +7,35 @@
 #include "lwip/sockets.h"
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
+#include "esp_mesh_lite.h"
 
 #define PAYLOAD_LEN       (1456) /**< Max payload size(in bytes) */
 #define UDP_PORT 7788
 
 static char *TAG = "APP_TCP";
 
+static bool tcp_create_flag = false;
 static int udp_socket = -1;
 static int tcp_socket = -1;
 static uint8_t* udp_rx_buffer;
 static uint32_t udp_rx_buffer_len;
 static char tcp_server_ip[16] = {0};
+
+static TaskHandle_t tcp_task_handle = NULL;
+
+void delete_tcp_task(void)
+{
+    if (tcp_socket != -1) {
+        ESP_LOGE(TAG, "Shutting down tcp socket1");
+        // shutdown(tcp_socket, 0);
+        ESP_LOGE(TAG, "Shutting down tcp socket2");
+        close(tcp_socket);
+        ESP_LOGE(TAG, "Shutting down tcp socket3");
+        tcp_socket = -1;
+    }
+    vTaskDelete(tcp_task_handle);
+    tcp_create_flag = false;
+}
 
 static int socket_tcp_client_create(const char *ip, uint16_t port)
 {
@@ -71,6 +89,10 @@ void tcp_client_write_task(void *arg)
     ESP_LOGI(TAG, "TCP client write task is running");
 
     while (1) {
+        if (esp_mesh_lite_get_level() != ROOT) {
+            goto exit;
+        }
+
         if (tcp_socket == -1) {
             vTaskDelay(500 / portTICK_PERIOD_MS);
             printf("tcp_server_ip %s, len:%d\r\n", tcp_server_ip, strlen(tcp_server_ip));
@@ -91,12 +113,15 @@ void tcp_client_write_task(void *arg)
         esp_wifi_sta_get_ap_info(&ap_info);
         esp_wifi_get_mac(ESP_IF_WIFI_STA, sta_mac);
 
-        size = asprintf(&data, "{\"self mac\": \"" MACSTR "\", \"level\": %d, \"count\": %d, \"parent mac\": \"" MACSTR "\", parent rssi: %d, free heap: %"PRIu32"}\r\n",
-                        MAC2STR(sta_mac), esp_mesh_lite_get_level(), count++, MAC2STR(ap_info.bssid), (ap_info.rssi != 0 ? ap_info.rssi : -120), esp_get_free_heap_size());
+        size = asprintf(&data, "{\"self mac\": \"" MACSTR "\", \"level\": %d, \"count\": %d, \"node num\": %d, \"parent mac\": \"" MACSTR "\", parent rssi: %d, free heap: %"PRIu32"}\r\n",
+                        MAC2STR(sta_mac), esp_mesh_lite_get_level(), count++, esp_mesh_lite_get_child_node_number() + 1, MAC2STR(ap_info.bssid), (ap_info.rssi != 0 ? ap_info.rssi : -120), esp_get_free_heap_size());
 
         printf("TCP write, size: %d, data: %s", size, data);
         ret = write(tcp_socket, data, size);
-        free(data);
+        if (data) {
+            free(data);
+            data = NULL;
+        }
 
         if (ret <= 0) {
             ESP_LOGE(TAG, "<%s> TCP write", strerror(errno));
@@ -105,17 +130,17 @@ void tcp_client_write_task(void *arg)
             continue;
         }
 
-        vTaskDelay(10000 / portTICK_PERIOD_MS);
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
     }
 
     ESP_LOGI(TAG, "TCP client write task is exit");
 
-    close(tcp_socket);
-    tcp_socket = -1;
+exit:
     if (data) {
         free(data);
+        data = NULL;
     }
-    vTaskDelete(NULL);
+    delete_tcp_task();
 }
 
 static int app_udp_socket_bind(int sock, uint16_t port)
@@ -165,6 +190,10 @@ static void udp_server_task(void* param)
     app_udp_socket_bind(udp_socket, UDP_PORT);
 
     while (1) {
+        if (esp_mesh_lite_get_level() != ROOT) {
+            goto exit;
+        }
+
         FD_ZERO(&rfds);
         FD_SET(udp_socket, &rfds);
         ESP_LOGD(TAG, "free heap: %"PRIu32"",esp_get_free_heap_size());
@@ -199,10 +228,17 @@ static void udp_server_task(void* param)
         }
     }
 
+exit:
+    if (udp_socket != -1) {
+        ESP_LOGE(TAG, "Shutting down udp socket");
+        // shutdown(udp_socket, 0);
+        close(udp_socket);
+        udp_socket = -1;
+    }
     if (udp_rx_buffer) {
         free(udp_rx_buffer);
+        udp_rx_buffer = NULL;
     }
-
     vTaskDelete(NULL);
 }
 
@@ -218,5 +254,18 @@ void app_udp_server_create(void)
 
 void app_tcp_client_create(void)
 {
-    xTaskCreate(tcp_client_write_task, "tcp_client_write_task", 4 * 1024, NULL, 5, NULL);
+    xTaskCreate(tcp_client_write_task, "tcp_client_write_task", 4 * 1024, NULL, 5, &tcp_task_handle);
+}
+
+esp_err_t app_node_info_report_task_create(void)
+{
+    esp_err_t ret = ESP_FAIL;
+
+    if (!tcp_create_flag && (esp_mesh_lite_get_level() == 1)) {
+        app_udp_server_create();
+        app_tcp_client_create();
+        tcp_create_flag = true;
+        ret =  ESP_OK;
+    }
+    return ret;
 }
