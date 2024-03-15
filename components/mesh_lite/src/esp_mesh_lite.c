@@ -199,6 +199,23 @@ uint8_t esp_mesh_lite_get_child_node_number(void)
     return node_number;
 }
 
+void esp_mesh_lite_get_child_node_info(void)
+{
+#ifdef CONFIG_MESH_LITE_NODE_INFO_REPORT
+    node_info_list_t* current = node_info_list;
+
+    if (xSemaphoreTake(node_info_mutex, portMAX_DELAY) != pdTRUE) {
+        return;
+    }
+
+    while (current) {
+        printf(""MACSTR": %d\r\n", MAC2STR(current->node->mac), current->node->level);
+        current = current->next;
+    }
+    xSemaphoreGive(node_info_mutex);
+#endif /* MESH_LITE_NODE_INFO_REPORT */
+}
+
 static void esp_mesh_lite_event_ip_changed_handler(void *arg, esp_event_base_t event_base,
                                                   int32_t event_id, void *event_data)
 {

@@ -1,5 +1,5 @@
 set(srcs "src/esp_mesh_lite_espnow.c")
-set(require_components "json" "esp_wifi" "app_update" "mesh_lite_priv")
+set(require_components "json" "esp_wifi" "app_update")
 
 if (CONFIG_MESH_LITE_ENABLE)
     list(APPEND srcs "src/esp_mesh_lite.c" "src/esp_mesh_lite_port.c" "src/esp_mesh_lite_log.c")

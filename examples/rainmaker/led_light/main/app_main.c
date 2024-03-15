@@ -53,6 +53,7 @@ static void print_system_info_timercb(TimerHandle_t timer)
 #if CONFIG_MESH_LITE_MAXIMUM_NODE_NUMBER
     if (esp_mesh_lite_get_level() == ROOT) {
         ESP_LOGI(TAG, "child node number: %d", esp_mesh_lite_get_child_node_number());
+        esp_mesh_lite_get_child_node_info();
     }
 #endif /* MESH_LITE_NODE_INFO_REPORT */
     // for (int i = 0; i < wifi_sta_list.num; i++) {

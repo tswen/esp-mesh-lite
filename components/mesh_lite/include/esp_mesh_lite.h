@@ -59,6 +59,8 @@ esp_err_t esp_mesh_lite_report_info(void);
  */
 uint8_t esp_mesh_lite_get_child_node_number(void);
 
+void esp_mesh_lite_get_child_node_info(void);
+
 /**
  * @brief Get the softap ssid from NVS
  *

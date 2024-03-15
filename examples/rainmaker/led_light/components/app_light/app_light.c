@@ -28,7 +28,7 @@ static const char *TAG = "app_light";
 static uint16_t g_hue = DEFAULT_HUE;
 static uint16_t g_saturation = DEFAULT_SATURATION;
 static uint16_t g_value = DEFAULT_BRIGHTNESS;
-static bool g_power = DEFAULT_POWER;
+static bool g_power = 0;
 
 extern esp_rmaker_device_t *light_device;
 

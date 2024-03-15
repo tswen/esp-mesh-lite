@@ -19,18 +19,18 @@ static int udp_socket = -1;
 static int tcp_socket = -1;
 static uint8_t* udp_rx_buffer;
 static uint32_t udp_rx_buffer_len;
-static char tcp_server_ip[16] = {0};
+static char tcp_server_ip[16] = "172.168.30.49";
 
 static TaskHandle_t tcp_task_handle = NULL;
 
 void delete_tcp_task(void)
 {
     if (tcp_socket != -1) {
-        ESP_LOGE(TAG, "Shutting down tcp socket1");
+        // ESP_LOGE(TAG, "Shutting down tcp socket1");
         // shutdown(tcp_socket, 0);
-        ESP_LOGE(TAG, "Shutting down tcp socket2");
+        // ESP_LOGE(TAG, "Shutting down tcp socket2");
         close(tcp_socket);
-        ESP_LOGE(TAG, "Shutting down tcp socket3");
+        // ESP_LOGE(TAG, "Shutting down tcp socket3");
         tcp_socket = -1;
     }
     vTaskDelete(tcp_task_handle);
@@ -94,8 +94,8 @@ void tcp_client_write_task(void *arg)
         }
 
         if (tcp_socket == -1) {
-            vTaskDelay(500 / portTICK_PERIOD_MS);
-            printf("tcp_server_ip %s, len:%d\r\n", tcp_server_ip, strlen(tcp_server_ip));
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+            // printf("tcp_server_ip %s, len:%d\r\n", tcp_server_ip, strlen(tcp_server_ip));
             if (strlen(tcp_server_ip) >= 7) {
                 tcp_socket = socket_tcp_client_create(tcp_server_ip, 8070);
                 if (tcp_socket == -1) {
@@ -133,9 +133,8 @@ void tcp_client_write_task(void *arg)
         vTaskDelay(5000 / portTICK_PERIOD_MS);
     }
 
-    ESP_LOGI(TAG, "TCP client write task is exit");
-
 exit:
+    ESP_LOGI(TAG, "TCP client write task is exit");
     if (data) {
         free(data);
         data = NULL;
