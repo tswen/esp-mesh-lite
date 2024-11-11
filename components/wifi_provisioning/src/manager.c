@@ -30,7 +30,7 @@
 #define WIFI_PROV_MGR_VERSION      "v1.1"
 #define WIFI_PROV_STORAGE_BIT       BIT0
 #define WIFI_PROV_SETTING_BIT       BIT1
-#define MAX_SCAN_RESULTS           CONFIG_WIFI_PROV_SCAN_MAX_ENTRIES
+#define MAX_SCAN_RESULTS           CONFIG_MESH_LITE_WIFI_PROV_SCAN_MAX_ENTRIES
 
 #define ACQUIRE_LOCK(mux)     assert(xSemaphoreTake(mux, portMAX_DELAY) == pdTRUE)
 #define RELEASE_LOCK(mux)     assert(xSemaphoreGive(mux) == pdTRUE)
@@ -1053,8 +1053,8 @@ static void wifi_prov_mgr_event_handler_internal(
          * stop provisioning after configured timeout. */
         if (!prov_ctx->mgr_info.capabilities.no_auto_stop) {
             ESP_LOGD(TAG, "Starting %d sec timer for stop_prov_timer_cb()",
-                     CONFIG_WIFI_PROV_AUTOSTOP_TIMEOUT);
-            esp_timer_start_once(prov_ctx->autostop_timer, CONFIG_WIFI_PROV_AUTOSTOP_TIMEOUT * 1000000U);
+                     CONFIG_MESH_LITE_WIFI_PROV_AUTOSTOP_TIMEOUT);
+            esp_timer_start_once(prov_ctx->autostop_timer, CONFIG_MESH_LITE_WIFI_PROV_AUTOSTOP_TIMEOUT * 1000000U);
         }
 
         /* Execute user registered callback handler */
