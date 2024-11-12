@@ -207,6 +207,51 @@ void app_wifi_set_softap_info(void)
     esp_mesh_lite_set_softap_info(softap_ssid, CONFIG_BRIDGE_SOFTAP_PASSWORD);
 }
 
+#include "mdns.h"
+#include "esp_http_server.h"
+
+esp_err_t http_get_handler(httpd_req_t *req)
+{
+    const char* resp_str = "Hello from ESP32!";
+    httpd_resp_send(req, resp_str, HTTPD_RESP_USE_STRLEN);
+    return ESP_OK;
+}
+
+esp_err_t start_http_server(void)
+{
+    httpd_handle_t server = NULL;
+    httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+
+    httpd_uri_t uri_get = {
+        .uri = "/",
+        .method = HTTP_GET,
+        .handler = http_get_handler,
+        .user_ctx = NULL
+    };
+
+    if (httpd_start(&server, &config) == ESP_OK) {
+        httpd_register_uri_handler(server, &uri_get);
+    } else {
+        ESP_LOGI("HTTP", "Error starting server!");
+    }
+    return ESP_OK;
+}
+
+esp_err_t start_mdns(void)
+{
+    esp_err_t err = mdns_init();
+    if (err) {
+        printf("MDNS Init failed: %d\n", err);
+        return ESP_FAIL;
+    }
+
+    mdns_hostname_set("esp32");
+    mdns_instance_name_set("ESP32 Thing");
+    mdns_register_netif(esp_netif_get_handle_from_ifkey("WIFI_STA_DEF"));
+    mdns_service_add("esp32", "_http", "_tcp", 80, NULL, 0);
+    return ESP_OK;
+}
+
 void app_main()
 {
     /**
@@ -238,4 +283,7 @@ void app_main()
     TimerHandle_t timer = xTimerCreate("print_system_info", 10000 / portTICK_PERIOD_MS,
                                        true, NULL, print_system_info_timercb);
     xTimerStart(timer, 0);
+
+    start_mdns();
+    start_http_server();
 }
