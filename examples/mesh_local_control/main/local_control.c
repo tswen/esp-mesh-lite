@@ -207,6 +207,19 @@ void app_wifi_set_softap_info(void)
     esp_mesh_lite_set_softap_info(softap_ssid, CONFIG_BRIDGE_SOFTAP_PASSWORD);
 }
 
+static void ap_handler(void *arg, esp_event_base_t event_base,
+                                                       int32_t event_id, void *event_data)
+{
+    static bool flag = true;
+    if (flag) {
+        esp_err_t esp_wifi_action_tx_start(bool status);
+        esp_err_t esp_wifi_action_rx_start(bool status);
+        esp_wifi_action_tx_start(true);
+        // esp_wifi_action_rx_start(true);
+        flag = false;
+    }
+}
+
 void app_main()
 {
     /**
@@ -234,6 +247,7 @@ void app_main()
      * @breif Create handler
      */
     ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &ip_event_sta_got_ip_handler, NULL, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, IP_EVENT_AP_STAIPASSIGNED, &ap_handler, NULL, NULL));
 
     TimerHandle_t timer = xTimerCreate("print_system_info", 10000 / portTICK_PERIOD_MS,
                                        true, NULL, print_system_info_timercb);
