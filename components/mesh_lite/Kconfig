@@ -196,6 +196,20 @@ menu "ESP Wi-Fi Mesh Lite"
                 are misconfigured. Provisioned credentials are erased and internal state machine
                 is reset after this threshold is reached.
 
+        config PROV_DISABLE_AUTO_STOP
+            bool "Disable auto stop wifi-prov-mgr"
+            default n
+            help
+                Enable DISABLE_AUTO_STOP - allow the device to provision for new credentials
+                after previous successful provisioning.
+
+        config PROV_REPROVISIONING
+            bool "Re-provisioning"
+            default n
+            help
+                The network provisioning service can be restarted by repeatedly
+                calling the esp_mesh_lite_wifi_prov_mgr_init function.
+
         config PROV_SHOW_QR
             bool "Show provisioning QR code"
             default y
