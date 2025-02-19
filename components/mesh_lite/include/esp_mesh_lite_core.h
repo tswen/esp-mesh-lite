@@ -541,7 +541,7 @@ void esp_mesh_lite_set_leaf_node_softap_status(esp_mesh_lite_leaf_node_softap_st
  *      - ESP_OK: Success
  *      - ESP_FAIL: Failed to set the fusion config
  */
-esp_err_t esp_mesh_lite_set_fusion_config(esp_mesh_lite_fusion_config_t *config);
+esp_err_t esp_mesh_lite_comm_set_fusion_config(esp_mesh_lite_fusion_config_t *config);
 
 /**
  * @brief  Get the mesh_lite_id
