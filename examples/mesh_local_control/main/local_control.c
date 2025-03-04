@@ -204,6 +204,31 @@ void app_wifi_set_softap_info(void)
     esp_mesh_lite_set_softap_info(softap_ssid, CONFIG_BRIDGE_SOFTAP_PASSWORD);
 }
 
+#include "iot_button.h"
+#define BUTTON_NUM            1
+#define BUTTON_SW1            9
+static button_handle_t g_btns[BUTTON_NUM] = { 0 };
+
+static void button_press_up_cb(void *hardware_data, void *usr_data)
+{
+    ESP_LOGI(TAG, "BTN: BUTTON_PRESS_UP");
+
+    static bool flag = true;
+
+    if (flag) {
+        esp_mesh_lite_file_transmit_config_t transmit_config = {
+            .type = ESP_MESH_LITE_OTA_TRANSMIT_FIRMWARE,
+            .fw_version = "6ad1994-dirt",
+            .size = 1000880,
+            .extern_url_ota_cb = NULL,
+        };
+        esp_mesh_lite_transmit_file_start(&transmit_config);
+    } else {
+        esp_wifi_disconnect();
+    }
+    flag = !flag;
+}
+
 void app_main()
 {
     /**
@@ -225,6 +250,8 @@ void app_main()
 
     app_wifi_set_softap_info();
 
+    esp_mesh_lite_set_mesh_id(77, true);
+
     esp_mesh_lite_start();
 
     /**
@@ -235,4 +262,14 @@ void app_main()
     TimerHandle_t timer = xTimerCreate("print_system_info", 10000 / portTICK_PERIOD_MS,
                                        true, NULL, print_system_info_timercb);
     xTimerStart(timer, 0);
+
+    button_config_t cfg = {
+        .type = BUTTON_TYPE_GPIO,
+        .gpio_button_config = {
+            .gpio_num = BUTTON_SW1,
+            .active_level = 0,
+        },
+    };
+    g_btns[0] = iot_button_create(&cfg);
+    iot_button_register_cb(g_btns[0], BUTTON_PRESS_UP, button_press_up_cb, 0);
 }
