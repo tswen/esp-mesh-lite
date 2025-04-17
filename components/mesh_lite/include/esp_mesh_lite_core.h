@@ -18,7 +18,8 @@ extern "C"
 
 extern const char* ESP_MESH_LITE_EVENT;
 
-#define MAC_MAX_LEN                   (18)
+#define HWADDR_LEN                    (6)
+#define MAC_STR_MAX_LEN               (18)
 #define IP_MAX_LEN                    (16)
 #define DEVICE_CATEGORY               (32)
 
@@ -227,6 +228,11 @@ typedef enum {
     ESP_MESH_LITE_OTA_TRANSMIT_BINARY,   /**< Transmit firmware binary file */
 } esp_mesh_lite_ota_transmit_type_t;
 
+typedef enum {
+    MESH_LITE_MSG_ID_USER_BEGIN = 101,
+    MESH_LITE_MSG_ID_USER_END   = 200,
+} esp_mesh_lite_raw_msg_id_t;
+
 /**
  * @brief Mesh-Lite configuration parameters passed to esp_mesh_lite_core_init call.
  */
@@ -335,8 +341,9 @@ typedef struct esp_mesh_lite_msg_action {
  * @brief Mesh-Lite raw message action parameters passed to esp_mesh_lite_raw_msg_action_list_register call.
  */
 typedef struct esp_mesh_lite_raw_msg_action {
-    uint32_t msg_id;                  /**< The ID of the raw message sent */
-    uint32_t resp_msg_id;             /**< The ID of the response message expected to be received. When a message with the expected ID is received, stop retransmitting.
+    uint32_t msg_id;                  /**< The ID of the raw message sent. Must be between MESH_LITE_MSG_ID_USER_BEGIN and MESH_LITE_MSG_ID_USER_END. */
+    uint32_t resp_msg_id;             /**< The ID of the response message expected to be received. Must be between MESH_LITE_MSG_ID_USER_BEGIN and MESH_LITE_MSG_ID_USER_END.
+                                       When a message with the expected ID is received, stop retransmitting.
                                        If set to 0, the message will be sent until the maximum number of retransmissions is reached. */
     raw_msg_process_cb_t raw_process; /**< The callback function when receiving the raw message. The raw message data can be processed in this callback. */
 } esp_mesh_lite_raw_msg_action_t;
@@ -366,6 +373,30 @@ typedef struct {
     size_t size;                                            /**< Size of the transmitted data */
     extern_url_ota_cb_t extern_url_ota_cb;                  /**< External URL OTA callback function */
 } esp_mesh_lite_file_transmit_config_t;
+
+/**
+ * @brief Basic node information structure containing essential node details
+ */
+typedef struct esp_mesh_lite_node_info {
+    uint8_t  level;                        /**< Current level/depth of the node in the mesh network hierarchy */
+    uint32_t ip_addr;                      /**< IPv4 address assigned to this node */
+    uint8_t  mac_valid_tail_bytes;         /**< Number of valid bytes from the end of MAC address used for node identification */
+    uint8_t  mac_addr[HWADDR_LEN];         /**< Hardware MAC address of the node's network interface */
+} esp_mesh_lite_node_info_t;
+
+/**
+ * @brief N-ary tree node structure for hierarchical mesh network topology management
+ *
+ * This structure implements a tree data structure where each node can have multiple children,
+ * allowing dynamic management of parent-child relationships in the mesh network.
+ */
+typedef struct esp_mesh_lite_tree_structure {
+    esp_mesh_lite_node_info_t info;                     /**< Node's basic information including level, IP and MAC addresses */
+    uint16_t children_num;                              /**< Number of children nodes */
+    uint16_t descendant_num;                            /**< Number of descendant nodes */
+    struct esp_mesh_lite_tree_structure* first_child;   /**< Pointer to the first child in the list of children nodes */
+    struct esp_mesh_lite_tree_structure* next_sibling;  /**< Pointer to the next sibling at the same level in the tree */
+} esp_mesh_lite_tree_structure_t;
 
 /*****************************************************/
 /**************** ESP Wi-Fi Mesh Lite ****************/
@@ -921,6 +952,49 @@ esp_err_t esp_mesh_lite_get_ssid_by_mac_cb_register(esp_mesh_lite_get_ssid_by_ma
  */
 esp_err_t esp_mesh_lite_scan_cb_register(esp_mesh_lite_scan_cb_t *cb);
 
+/**
+ * @brief Get all mesh node number of Mesh-Lite
+ *
+ * This function returns the total number of nodes in the Mesh-Lite network,
+ * including the current node itself.
+ *
+ * @return The total number of nodes in the Mesh-Lite network
+ */
+uint32_t esp_mesh_lite_get_mesh_node_number(void);
+
+/**
+ * @brief Get the family tree structure of the entire Mesh-Lite network
+ *
+ * This function returns a pointer to the root of the family tree structure that
+ * represents the topology of the entire Mesh-Lite network. The tree includes all
+ * nodes in the network and their relationships.
+ *
+ * @param[out] tree Double pointer to store the address of the family tree root node
+ * @return The total number of nodes in the family tree
+ */
+uint32_t esp_mesh_lite_get_family_mesh_topology(esp_mesh_lite_tree_structure_t** tree);
+
+/**
+ * @brief Set the number of MAC address bytes
+ * @param mac_bytes_len Number of MAC address bytes
+ * @return
+ *     - ESP_OK: Successfully set
+ *     - ESP_ERR_INVALID_ARG: Invalid argument (bytes less than 3 or greater than 6)
+ * @note Maximum bytes is 6, values above 6 are invalid; minimum bytes is 3, values below 3 are invalid
+ * @note The smaller the number of bytes, the more device information can be transmitted;
+ *       the larger the number of bytes, the less device information can be transmitted
+ * @note Must be called after esp_mesh_lite_init and before esp_mesh_lite_start
+ */
+esp_err_t esp_mesh_lite_set_self_mac_size_for_report(uint8_t len);
+
+/**
+ * @brief Get the current MAC address bytes
+ * @return The current MAC address bytes length setting (between 3 and 6 bytes)
+ * @note This value determines how many bytes of MAC address are used when converting
+ *       device information to protobuf format for transmission
+ */
+uint8_t esp_mesh_lite_get_self_mac_size_for_report(void);
+
 #ifdef CONFIG_ESP_MESH_LITE_OTA_ENABLE
 /*****************************************************/
 /************ ESP Wi-Fi Mesh Lite LAN OTA ************/
@@ -1214,16 +1288,18 @@ esp_err_t esp_mesh_lite_send_raw_msg_to_parent(const uint8_t* data, size_t size)
  * The message will be retransmitted until a message with the expected response message ID
  * is received or the maximum number of retransmissions is reached.
  *
- * @param[in] msg_id            ID of the message to be sent.
- * @param[in] expect_resp_msg_id ID of the expected response message.
- * @param[in] max_retry         Maximum number of retransmissions.
- * @param[in] data              Pointer to the data to be sent.
- * @param[in] size              Size of the data to be sent.
- * @param[in] raw_resend        Function pointer to the send message function.
- *                              - esp_mesh_lite_send_broadcast_raw_msg_to_child()
- *                              - esp_mesh_lite_send_broadcast_raw_msg_to_parent()
- *                              - esp_mesh_lite_send_raw_msg_to_root()
- *                              - esp_mesh_lite_send_raw_msg_to_parent()
+ * @param[in] msg_id             ID of the message to be sent. Must be between MESH_LITE_MSG_ID_USER_BEGIN
+ *                               and MESH_LITE_MSG_ID_USER_END.
+ * @param[in] expect_resp_msg_id ID of the expected response message. Must be between MESH_LITE_MSG_ID_USER_BEGIN
+ *                               and MESH_LITE_MSG_ID_USER_END.
+ * @param[in] max_retry          Maximum number of retransmissions.
+ * @param[in] data               Pointer to the data to be sent.
+ * @param[in] size               Size of the data to be sent.
+ * @param[in] raw_resend         Function pointer to the send message function.
+ *                               - esp_mesh_lite_send_broadcast_raw_msg_to_child()
+ *                               - esp_mesh_lite_send_broadcast_raw_msg_to_parent()
+ *                               - esp_mesh_lite_send_raw_msg_to_root()
+ *                               - esp_mesh_lite_send_raw_msg_to_parent()
  *
  * @return
  *      - ESP_OK: Successfully sent the message.
@@ -1246,18 +1322,20 @@ esp_err_t esp_mesh_lite_try_sending_raw_msg(uint32_t msg_id,
  * retransmissions is determined by the `retry_interval` parameter, which must be a multiple
  * of 100 and cannot be smaller than 100 milliseconds.
  *
- * @param[in] msg_id            ID of the message to be sent.
- * @param[in] expect_resp_msg_id ID of the expected response message.
- * @param[in] max_retry         Maximum number of retransmissions.
- * @param[in] retry_interval    Interval between each retransmission (in milliseconds).
- *                              The value must be a multiple of 100 and at least 100 ms.
- * @param[in] data              Pointer to the data to be sent.
- * @param[in] size              Size of the data to be sent.
- * @param[in] raw_resend        Function pointer to the send message function.
- *                              - esp_mesh_lite_send_broadcast_raw_msg_to_child()
- *                              - esp_mesh_lite_send_broadcast_raw_msg_to_parent()
- *                              - esp_mesh_lite_send_raw_msg_to_root()
- *                              - esp_mesh_lite_send_raw_msg_to_parent()
+ * @param[in] msg_id             ID of the message to be sent. Must be between MESH_LITE_MSG_ID_USER_BEGIN
+ *                               and MESH_LITE_MSG_ID_USER_END.
+ * @param[in] expect_resp_msg_id ID of the expected response message. Must be between MESH_LITE_MSG_ID_USER_BEGIN
+ *                               and MESH_LITE_MSG_ID_USER_END.
+ * @param[in] max_retry          Maximum number of retransmissions.
+ * @param[in] retry_interval     Interval between each retransmission (in milliseconds).
+ *                               The value must be a multiple of 100 and at least 100 ms.
+ * @param[in] data               Pointer to the data to be sent.
+ * @param[in] size               Size of the data to be sent.
+ * @param[in] raw_resend         Function pointer to the send message function.
+ *                               - esp_mesh_lite_send_broadcast_raw_msg_to_child()
+ *                               - esp_mesh_lite_send_broadcast_raw_msg_to_parent()
+ *                               - esp_mesh_lite_send_raw_msg_to_root()
+ *                               - esp_mesh_lite_send_raw_msg_to_parent()
  *
  * @return
  *      - ESP_OK: Successfully sent the message.
@@ -1277,6 +1355,9 @@ esp_err_t esp_mesh_lite_try_sending_raw_msg_with_retry_inerval(uint32_t msg_id,
  *
  * This function registers a raw message action, which includes the message ID,
  * response message ID, and the callback function to process the raw message.
+ *
+ * @note The msg_id and resp_msg_id in msg_action must be between MESH_LITE_MSG_ID_USER_BEGIN
+ *       and MESH_LITE_MSG_ID_USER_END.
  *
  * @param[in] msg_action Pointer to the raw message action structure to be registered.
  *

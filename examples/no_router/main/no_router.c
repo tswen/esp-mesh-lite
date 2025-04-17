@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2022-2024 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2022-2025 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -19,6 +19,26 @@
 #include "esp_mesh_lite.h"
 
 static const char *TAG = "no_router";
+
+static void esp_mesh_lite_preorder_traversal(esp_mesh_lite_tree_structure_t* root)
+{
+    if (!root) {
+        return;
+    }
+
+    ESP_LOGI(TAG, "Level: %d, IP: " IPSTR ", MAC: %02X:%02X:%02X:%02X:%02X:%02X",
+             root->info.level,
+             IP2STR((ip4_addr_t*)&root->info.ip_addr),
+             root->info.mac_addr[0], root->info.mac_addr[1],
+             root->info.mac_addr[2], root->info.mac_addr[3],
+             root->info.mac_addr[4], root->info.mac_addr[5]);
+
+    esp_mesh_lite_tree_structure_t* child = root->first_child;
+    while (child != NULL) {
+        esp_mesh_lite_preorder_traversal(child);
+        child = child->next_sibling;
+    }
+}
 
 /**
  * @brief Timed printing system information
@@ -47,15 +67,10 @@ static void print_system_info_timercb(TimerHandle_t timer)
         ESP_LOGI(TAG, "Child mac: " MACSTR, MAC2STR(wifi_sta_list.sta[i].mac));
     }
 
-    uint32_t size = 0;
-    const node_info_list_t *node = esp_mesh_lite_get_nodes_list(&size);
-    printf("MeshLite nodes %ld:\r\n", size);
-    for (uint32_t loop = 0; (loop < size) && (node != NULL); loop++) {
-        struct in_addr ip_struct;
-        ip_struct.s_addr = node->node->ip_addr;
-        printf("%ld: %d, "MACSTR", %s\r\n" , loop + 1, node->node->level, MAC2STR(node->node->mac_addr), inet_ntoa(ip_struct));
-        node = node->next;
-    }
+    esp_mesh_lite_tree_structure_t* family_tree = NULL;
+    uint32_t family_count = esp_mesh_lite_get_family_mesh_topology(&family_tree);
+    ESP_LOGI(TAG, "Family tree node number: %"PRIu32"", family_count);
+    esp_mesh_lite_preorder_traversal(family_tree);
 }
 
 static esp_err_t esp_storage_init(void)
@@ -81,12 +96,12 @@ static void wifi_init(void)
 
     // Softap
     wifi_config_t wifi_softap_config = {
-                                           .ap = {
-                                                     .ssid = CONFIG_BRIDGE_SOFTAP_SSID,
-                                                     .password = CONFIG_BRIDGE_SOFTAP_PASSWORD,
-                                                     .channel = CONFIG_MESH_CHANNEL,
-                                                 },
-                                       };
+        .ap = {
+            .ssid = CONFIG_BRIDGE_SOFTAP_SSID,
+            .password = CONFIG_BRIDGE_SOFTAP_PASSWORD,
+            .channel = CONFIG_MESH_CHANNEL,
+        },
+    };
     esp_bridge_wifi_set_config(WIFI_IF_AP, &wifi_softap_config);
 }
 

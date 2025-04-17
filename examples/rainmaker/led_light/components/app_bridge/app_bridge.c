@@ -58,7 +58,7 @@ static esp_rmaker_param_t *child_mac_param;
 static esp_rmaker_param_t *mesh_group_param;
 
 typedef struct esp_mesh_lite_child_info {
-    char mac[MAC_MAX_LEN];
+    char mac[MAC_STR_MAX_LEN];
     char ip[IP_MAX_LEN];
     struct esp_mesh_lite_child_info* next;
 } esp_mesh_lite_child_info_t;
@@ -113,7 +113,7 @@ esp_err_t esp_rmaker_mesh_lite_add_child_info(char* mac, char* ip)
     esp_mesh_lite_child_info_t* new = child_info;
 
     while (new) {
-        if (!strncmp(new->mac, mac, (MAC_MAX_LEN - 1))) {
+        if (!strncmp(new->mac, mac, (MAC_STR_MAX_LEN - 1))) {
             xSemaphoreGive(child_info_mutex);
             return ESP_ERR_DUPLICATE_ADDITION;
         }
@@ -128,7 +128,7 @@ esp_err_t esp_rmaker_mesh_lite_add_child_info(char* mac, char* ip)
         return ESP_ERR_NO_MEM;
     }
 
-    memcpy(new->mac, mac, MAC_MAX_LEN);
+    memcpy(new->mac, mac, MAC_STR_MAX_LEN);
     memcpy(new->ip, ip, IP_MAX_LEN);
 
     new->next = child_info;
@@ -146,7 +146,7 @@ void esp_rmaker_mesh_lite_remove_child_info(char* mac)
     esp_mesh_lite_child_info_t* prev = NULL;
 
     while (current) {
-        if (!strncmp(current->mac, mac, (MAC_MAX_LEN - 1))) {
+        if (!strncmp(current->mac, mac, (MAC_STR_MAX_LEN - 1))) {
             if (prev == NULL) {
                 child_info = child_info->next;
             } else {
@@ -173,7 +173,7 @@ void esp_rmaker_mesh_lite_child_info_update_and_report(void)
 
     while (p) {
         if (loop < MAX_STATION) {
-            memcpy(mac_strings[loop], p->mac, MAC_MAX_LEN);
+            memcpy(mac_strings[loop], p->mac, MAC_STR_MAX_LEN);
             memcpy(ip_strings[loop], p->ip, IP_MAX_LEN);
         } else {
             break;
@@ -334,9 +334,6 @@ static void ip_event_handler(void *arg, esp_event_base_t event_base,
 
     if (esp_mesh_lite_get_level() > 1) {
         app_rmaker_mesh_lite_report_child_info();
-#if CONFIG_MESH_LITE_NODE_INFO_REPORT
-        esp_mesh_lite_report_info();
-#endif
     }
     app_rmaker_mesh_lite_level_update_and_report(esp_mesh_lite_get_level());
     app_rmaker_mesh_lite_self_ip_update_and_report(NULL, &event->ip_info);
@@ -360,17 +357,6 @@ static void esp_mesh_lite_handler(void *arg, esp_event_base_t event_base,
         esp_rmaker_mesh_lite_remove_child_info(event->mac);
         esp_rmaker_mesh_lite_child_info_update_and_report();
         break;
-#if CONFIG_MESH_LITE_NODE_INFO_REPORT
-    case ESP_MESH_LITE_EVENT_NODE_JOIN:
-        ESP_LOGI(TAG, "[Node Info Join]  Level:%d  Mac:%s\r\n", event->level, event->mac);
-        break;
-    case ESP_MESH_LITE_EVENT_NODE_LEAVE:
-        ESP_LOGI(TAG, "[Node Info Leave]  Level:%d  Mac:%s\r\n", event->level, event->mac);
-        break;
-    case ESP_MESH_LITE_EVENT_NODE_CHANGE:
-        ESP_LOGI(TAG, "[Node Info change]  Level:%d  Mac:%s\r\n", event->level, event->mac);
-        break;
-#endif
     }
 }
 
@@ -419,8 +405,8 @@ static char* esp_rmaker_mesh_lite_self_mac_format(void)
 {
     char *self_mac_obj[2];
     char *self_mac_string = NULL;
-    self_mac_obj[0] = (char*)calloc(MAC_MAX_LEN, 1);
-    self_mac_obj[1] = (char*)calloc(MAC_MAX_LEN, 1);
+    self_mac_obj[0] = (char*)calloc(MAC_STR_MAX_LEN, 1);
+    self_mac_obj[1] = (char*)calloc(MAC_STR_MAX_LEN, 1);
 
     if (!self_mac_obj[0] || !self_mac_obj[1]) {
         return NULL;
@@ -428,9 +414,9 @@ static char* esp_rmaker_mesh_lite_self_mac_format(void)
 
     uint8_t mac_temp[6];
     esp_wifi_get_mac(WIFI_IF_AP, mac_temp);
-    snprintf(self_mac_obj[0], MAC_MAX_LEN, MACSTR, MAC2STR(mac_temp));
+    snprintf(self_mac_obj[0], MAC_STR_MAX_LEN, MACSTR, MAC2STR(mac_temp));
     esp_wifi_get_mac(WIFI_IF_STA, mac_temp);
-    snprintf(self_mac_obj[1], MAC_MAX_LEN, MACSTR, MAC2STR(mac_temp));
+    snprintf(self_mac_obj[1], MAC_STR_MAX_LEN, MACSTR, MAC2STR(mac_temp));
 
     cJSON *self_mac_item = cJSON_CreateStringArray((const char* const*)self_mac_obj, 2);
     if (self_mac_item) {
@@ -556,8 +542,8 @@ esp_err_t app_rmaker_enable_bridge(void)
     child_info_mutex = xSemaphoreCreateMutex();
 
     for (uint8_t i = 0; i < MAX_STATION; i++) {
-        mac_strings[i] = (char*)malloc(MAC_MAX_LEN);
-        memset(mac_strings[i], 0x0, MAC_MAX_LEN);
+        mac_strings[i] = (char*)malloc(MAC_STR_MAX_LEN);
+        memset(mac_strings[i], 0x0, MAC_STR_MAX_LEN);
     }
 
     for (uint8_t i = 0; i < MAX_STATION; i++) {
