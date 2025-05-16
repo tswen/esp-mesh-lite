@@ -13,10 +13,34 @@ if (CONFIG_MESH_LITE_WIRELESS_DEBUG)
     list(APPEND srcs "src/esp_mesh_lite_wireless_debug.c")
 endif()
 
+# Apply ESP-IDF Patch
+if(IDF_VERSION_MAJOR EQUAL 5 AND IDF_VERSION_MINOR EQUAL 5)
+    execute_process(COMMAND
+                    git apply ${CMAKE_CURRENT_LIST_DIR}/patches/lwip_kconfig_v5.5.patch
+                    WORKING_DIRECTORY $ENV{IDF_PATH})
+    message(STATUS "Apply ESP-IDF Patch: lwip_kconfig_v5.5.patch")
+else()
+    execute_process(COMMAND
+                    git apply ${CMAKE_CURRENT_LIST_DIR}/patches/lwip_kconfig_below_v5.5.patch
+                    WORKING_DIRECTORY $ENV{IDF_PATH})
+    message(STATUS "Apply ESP-IDF Patch: lwip_kconfig_below_v5.5.patch")
+endif()
+
 idf_component_register(SRCS "${srcs}"
                        INCLUDE_DIRS include
                        REQUIRES ${require_components})
 
+execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/include/esp_mesh_lite_lwip_hook.h ${CMAKE_BINARY_DIR}/config/)
+get_property(hook_file GLOBAL PROPERTY CUSTOMER_LWIP_HOOK_FILE_LISTS)
+
+if(NOT "${hook_file}" STREQUAL "")
+    file(APPEND ${hook_file} "#include \"esp_mesh_lite_lwip_hook.h\"\n")
+endif()
+
+idf_component_get_property(lwip lwip COMPONENT_LIB)
+if(IDF_VERSION_MAJOR EQUAL 5 AND IDF_VERSION_MINOR LESS 4)
+    target_link_libraries(${lwip} INTERFACE "-Wl,--wrap=dhcp_parse_extra_opts_internal")
+endif()
 
 if (NOT CONFIG_MESH_LITE_CORE_ENABLE)
     string(CONCAT LIBS "esp_mesh_lite_" "${IDF_TARGET}")
