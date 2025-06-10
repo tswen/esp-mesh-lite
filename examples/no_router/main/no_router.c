@@ -20,6 +20,15 @@
 
 static const char *TAG = "no_router";
 
+typedef enum {
+    MESH_LITE_MSG_ID_BROADCAST_INFO_TO_CHILD = 10,
+    MESH_LITE_MSG_ID_BROADCAST_INFO_TO_SIBLING,
+    MESH_LITE_MSG_ID_REPORT_INFO_TO_ROOT,
+    MESH_LITE_MSG_ID_REPORT_INFO_TO_ROOT_ACK,
+    MESH_LITE_MSG_ID_REPORT_INFO_TO_PARENT,
+    MESH_LITE_MSG_ID_REPORT_INFO_TO_PARENT_ACK,
+} app_msg_id_t;
+
 /**
  * @brief Timed printing system information
  */
@@ -56,6 +65,92 @@ static void print_system_info_timercb(TimerHandle_t timer)
         printf("%ld: %d, "MACSTR", %s\r\n" , loop + 1, node->node->level, MAC2STR(node->node->mac_addr), inet_ntoa(ip_struct));
         node = node->next;
     }
+}
+
+#include "iot_button.h"
+#define BUTTON_NUM            1
+#define BUTTON_SW1            9
+static button_handle_t g_btns[BUTTON_NUM] = { 0 };
+static TimerHandle_t test_timer;
+
+static uint8_t report_raw_msg_to_root_data[12] = {0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20, 0x21};
+
+static esp_err_t report_raw_msg_to_root_process(uint8_t *data, uint32_t len, uint8_t **out_data, uint32_t* out_len, uint32_t seq)
+{
+    *out_len = 0;
+    printf("[recv report from child | seq %"PRIu32"]\r\n", seq);
+    ESP_LOG_BUFFER_HEXDUMP("recv report from child", data, len, ESP_LOG_WARN);
+    return ESP_OK;
+}
+
+static esp_err_t report_raw_msg_to_root_ack_process(uint8_t *data, uint32_t len, uint8_t **out_data, uint32_t* out_len, uint32_t seq)
+{
+    return ESP_OK;
+}
+
+esp_err_t esp_mesh_lite_report_raw_msg_to_root(void)
+{
+    ESP_LOG_BUFFER_HEXDUMP("send report to root", report_raw_msg_to_root_data, sizeof(report_raw_msg_to_root_data), ESP_LOG_WARN);
+    esp_mesh_lite_msg_config_t config = {
+        .raw_msg = {
+            .msg_id = MESH_LITE_MSG_ID_REPORT_INFO_TO_ROOT,
+            .expect_resp_msg_id = MESH_LITE_MSG_ID_REPORT_INFO_TO_ROOT_ACK,
+            .max_retry = 3,
+            .data = report_raw_msg_to_root_data,
+            .size = sizeof(report_raw_msg_to_root_data),
+            .raw_resend = esp_mesh_lite_send_raw_msg_to_root,
+        },
+    };
+    esp_mesh_lite_send_msg(ESP_MESH_LITE_RAW_MSG, &config);
+    return ESP_OK;
+}
+
+static const esp_mesh_lite_raw_msg_action_t raw_msgs_test_action[] = {
+    // {MESH_LITE_MSG_ID_BROADCAST_INFO_TO_CHILD, 0, broadcast_raw_msg_to_child_process},
+
+    /* broadcast raw msg to the sibling node */
+    // {MESH_LITE_MSG_ID_BROADCAST_INFO_TO_SIBLING, 0, broadcast_raw_msg_to_sibling_process},
+
+    /* report raw msg to the root node */
+    {MESH_LITE_MSG_ID_REPORT_INFO_TO_ROOT, MESH_LITE_MSG_ID_REPORT_INFO_TO_ROOT_ACK, report_raw_msg_to_root_process},
+    {MESH_LITE_MSG_ID_REPORT_INFO_TO_ROOT_ACK, 0, report_raw_msg_to_root_ack_process},
+
+    /* report raw msg to the parent node */
+    // {MESH_LITE_MSG_ID_REPORT_INFO_TO_PARENT, MESH_LITE_MSG_ID_REPORT_INFO_TO_PARENT_ACK, report_raw_msg_to_parent_process},
+    // {MESH_LITE_MSG_ID_REPORT_INFO_TO_PARENT_ACK, 0, report_raw_msg_to_parent_ack_process},
+
+    {0, 0, NULL}
+};
+
+void esp_mesh_lite_comm_init(void)
+{
+    esp_mesh_lite_raw_msg_action_list_register(raw_msgs_test_action);
+}
+
+static void test_timer_cb(TimerHandle_t timer)
+{
+    ESP_LOGI(TAG, "communication test running...");
+    char* outdata = "Hello from no_router!";
+    uint32_t out_len = sizeof(outdata);
+    esp_mesh_lite_msg_config_t config = {
+        .raw_msg = {
+            .msg_id = MESH_LITE_MSG_ID_REPORT_INFO_TO_ROOT,
+            .expect_resp_msg_id = MESH_LITE_MSG_ID_REPORT_INFO_TO_ROOT_ACK,
+            .max_retry = 3,
+            .data = (uint8_t*)outdata,
+            .size = out_len,
+            .raw_resend = esp_mesh_lite_send_raw_msg_to_root,
+        },
+    };
+    esp_mesh_lite_send_msg(ESP_MESH_LITE_RAW_MSG, &config);
+    ESP_LOGI(TAG, "Free heap: %" PRIu32 "", esp_get_free_heap_size());
+}
+
+static void button_press_up_cb(void *hardware_data, void *usr_data)
+{
+    ESP_LOGI(TAG, "BTN: BUTTON_PRESS_UP");
+
+    xTimerStart(test_timer, 0);
 }
 
 static esp_err_t esp_storage_init(void)
@@ -157,7 +252,21 @@ void app_main()
 
     esp_mesh_lite_start();
 
-    TimerHandle_t timer = xTimerCreate("print_system_info", 10000 / portTICK_PERIOD_MS,
-                                       true, NULL, print_system_info_timercb);
-    xTimerStart(timer, 0);
+    esp_mesh_lite_comm_init();
+
+    // TimerHandle_t timer = xTimerCreate("print_system_info", 10000 / portTICK_PERIOD_MS,
+    //                                    true, NULL, print_system_info_timercb);
+    // xTimerStart(timer, 0);
+
+    test_timer = xTimerCreate("test_timer", 500 / portTICK_PERIOD_MS, true, NULL, test_timer_cb);
+
+    button_config_t cfg = {
+        .type = BUTTON_TYPE_GPIO,
+        .gpio_button_config = {
+            .gpio_num = BUTTON_SW1,
+            .active_level = 0,
+        },
+    };
+    g_btns[0] = iot_button_create(&cfg);
+    iot_button_register_cb(g_btns[0], BUTTON_PRESS_UP, button_press_up_cb, 0);
 }
