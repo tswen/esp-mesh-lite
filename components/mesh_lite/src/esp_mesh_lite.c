@@ -64,6 +64,10 @@ esp_err_t esp_mesh_lite_report_info(void)
     req.node_mac.data = mac;
     uint32_t outlen = mesh_lite__node_data__get_packed_size(&req);
     uint8_t *outdata = malloc(outlen);
+    if (!outdata) {
+        ESP_LOGW(TAG, "%s %d: Failed to allocate memory", __func__, __LINE__);
+        return ESP_ERR_NO_MEM;
+    }
     mesh_lite__node_data__pack(&req, outdata);
 
     esp_mesh_lite_msg_config_t config = {
@@ -76,14 +80,18 @@ esp_err_t esp_mesh_lite_report_info(void)
             .raw_resend = esp_mesh_lite_send_raw_msg_to_root,
         },
     };
-    esp_mesh_lite_send_msg(ESP_MESH_LITE_RAW_MSG, &config);
+    esp_err_t ret = esp_mesh_lite_send_msg(ESP_MESH_LITE_RAW_MSG, &config);
     free(outdata);
 
-    return ESP_OK;
+    return ret;
 }
 
 static esp_err_t esp_mesh_lite_node_info_update(uint8_t level, uint8_t* mac, uint32_t ip_addr)
 {
+    if (!mac) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
     xSemaphoreTake(node_info_mutex, portMAX_DELAY);
     node_info_list_t* new = node_info_list;
 
@@ -105,14 +113,14 @@ static esp_err_t esp_mesh_lite_node_info_update(uint8_t level, uint8_t* mac, uin
     }
 
     /* not found, create a new */
-    new = (node_info_list_t*)malloc(sizeof(node_info_list_t));
+    new = (node_info_list_t*)calloc(1, sizeof(node_info_list_t));
     if (new == NULL) {
         ESP_LOGE(TAG, "node info add fail(no mem)");
         xSemaphoreGive(node_info_mutex);
         return ESP_ERR_NO_MEM;
     }
 
-    new->node = (esp_mesh_lite_node_info_t*)malloc(sizeof(esp_mesh_lite_node_info_t));
+    new->node = (esp_mesh_lite_node_info_t*)calloc(1, sizeof(esp_mesh_lite_node_info_t));
     if (new->node == NULL) {
         free(new);
         ESP_LOGE(TAG, "node info add fail(no mem)");
@@ -292,31 +300,43 @@ static esp_err_t esp_mesh_lite_update_nodes_info_to_children(void)
 {
     MeshLite__Data req;
     uint32_t total_num = 0;
+    esp_err_t ret = ESP_OK;
 
     mesh_lite__data__init(&req);
     const node_info_list_t *node = esp_mesh_lite_get_nodes_list(&total_num);
     if (total_num > 0) {
         uint32_t loop = 0;
-        req.nodes = malloc(total_num * sizeof(MeshLite__NodeData*));
+        req.nodes = calloc(total_num, sizeof(MeshLite__NodeData*));
+        if (!req.nodes) {
+            return ESP_ERR_NO_MEM;
+        }
+
         for (loop = 0; (loop < total_num) && (node != NULL); loop++) {
-            req.nodes[loop] = malloc(sizeof(MeshLite__NodeData));
+            req.nodes[loop] = calloc(1, sizeof(MeshLite__NodeData));
+            if (!req.nodes[loop]) {
+                ret = ESP_ERR_NO_MEM;
+                goto cleanup_nodes;
+            }
             mesh_lite__node_data__init(req.nodes[loop]);
             req.nodes[loop]->node_level = node->node->level;
             req.nodes[loop]->node_ip = node->node->ip_addr;
             req.nodes[loop]->node_mac.len = ETH_HWADDR_LEN;
             req.nodes[loop]->node_mac.data = malloc(ETH_HWADDR_LEN);
+            if (!req.nodes[loop]->node_mac.data) {
+                ret = ESP_ERR_NO_MEM;
+                goto cleanup_nodes;
+            }
             memcpy(req.nodes[loop]->node_mac.data, node->node->mac_addr, ETH_HWADDR_LEN);
             node = node->next;
         }
         req.n_nodes = loop;
         size_t outlen = mesh_lite__data__get_packed_size(&req);
         uint8_t* outdata = malloc(outlen);
-        mesh_lite__data__pack(&req, outdata);
-        for (uint32_t i = 0; i < loop; i++) {
-            free(req.nodes[i]->node_mac.data);
-            free(req.nodes[i]);
+        if (!outdata) {
+            ret = ESP_ERR_NO_MEM;
+            goto cleanup_nodes;
         }
-        free(req.nodes);
+        mesh_lite__data__pack(&req, outdata);
 
         esp_mesh_lite_msg_config_t config = {
             .raw_msg = {
@@ -328,8 +348,20 @@ static esp_err_t esp_mesh_lite_update_nodes_info_to_children(void)
                 .raw_resend = esp_mesh_lite_send_broadcast_raw_msg_to_child,
             },
         };
-        esp_mesh_lite_send_msg(ESP_MESH_LITE_RAW_MSG, &config);
+        ret = esp_mesh_lite_send_msg(ESP_MESH_LITE_RAW_MSG, &config);
         free(outdata);
+
+cleanup_nodes:
+        for (uint32_t i = 0; i < loop; i++) {
+            if (req.nodes[i]) {
+                if (req.nodes[i]->node_mac.data) {
+                    free(req.nodes[i]->node_mac.data);
+                }
+                free(req.nodes[i]);
+            }
+        }
+        free(req.nodes);
+        return ret;
     }
     return ESP_OK;
 }
