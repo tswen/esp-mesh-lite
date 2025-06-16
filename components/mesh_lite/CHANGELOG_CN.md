@@ -1,6 +1,6 @@
 # ChangeLog
 
-## v1.0.2 - 2025-5-29
+## v1.0.2 - 2025-6-16
 
 ### Breaking Change:
 
@@ -11,6 +11,7 @@
 
 #### Mesh
 
+- 优化了根节点设置 mesh id 时无需断开重连路由器的流程
 - 支持动态设置 Wi-Fi 重连间隔 ([803c8e9](https://github.com/espressif/esp-mesh-lite/commit/803c8e93e9df459fefe29794b66464ce0c21bf5f))
 - 新增对 ESP32-C61 的支持 ([4a2b7e4](https://github.com/espressif/esp-mesh-lite/commit/4a2b7e4b4c04b3c96c941f8b8e82758f0c5c4bfb))
 - 优化部分场景下的融合过程，缩短融合时间 ([544b925](https://github.com/espressif/esp-mesh-lite/commit/544b925c705b80acf823216f8236bf57339c7b9f))
@@ -32,6 +33,7 @@
 
 #### Bugfix
 
+- 修复了在通信过程中偶尔出现的内存泄漏问题
 - 修复当通信数据通过 aes 加密时的 LAN OTA 升级以及文件传输失败的问题 ([70f5657](https://github.com/espressif/esp-mesh-lite/commit/70f5657e91e065546f2e626b8a4042de0a948f93))
 - 修复当前 RSSI 低于重新设置的父节点 RSSI 阈值时，未触发父节点变更的问题 ([d84f81b](https://github.com/espressif/esp-mesh-lite/commit/d84f81b2309b2ba1ba1819364a99d61f88c73af3))
 - 修复设备设置为叶子节点后，其子节点未断开连接的问题 ([d84f81b](https://github.com/espressif/esp-mesh-lite/commit/d84f81b2309b2ba1ba1819364a99d61f88c73af3))

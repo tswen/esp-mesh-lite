@@ -2,7 +2,7 @@
 
 # ChangeLog
 
-## v1.0.2 - 2025-4-21
+## v1.0.2 - 2025-6-16
 
 ### Breaking Change:
 
@@ -13,6 +13,7 @@
 
 #### Mesh
 
+- Optimize the process of setting mesh id for root node without disconnection/reconnection of router
 - Support dynamically setting Wi-Fi reconnection intervals ([803c8e9](https://github.com/espressif/esp-mesh-lite/commit/803c8e93e9df459fefe29794b66464ce0c21bf5f))
 - Added support for ESP32-C61 ([4a2b7e4](https://github.com/espressif/esp-mesh-lite/commit/4a2b7e4b4c04b3c96c941f8b8e82758f0c5c4bfb))
 - Optimized: speed up fusion process for specific scenarios​ ([544b925](https://github.com/espressif/esp-mesh-lite/commit/544b925c705b80acf823216f8236bf57339c7b9f))
@@ -34,6 +35,7 @@
 
 #### Bugfix
 
+- Fixed: Occasional memory leaks during communication
 - Fixed: LAN OTA upgrade and file transfer failures when communication data is encrypted using AES ([70f5657](https://github.com/espressif/esp-mesh-lite/commit/70f5657e91e065546f2e626b8a4042de0a948f93))
 - Fixed: When multiple root nodes have the same RSSI value during fusion, it may cause the node number to exceed the max node number limit ([d84f81b](https://github.com/espressif/esp-mesh-lite/commit/d84f81b2309b2ba1ba1819364a99d61f88c73af3))
 - Fixed: Disconnect all mesh nodes when setting device as leaf node ([d84f81b](https://github.com/espressif/esp-mesh-lite/commit/d84f81b2309b2ba1ba1819364a99d61f88c73af3))
