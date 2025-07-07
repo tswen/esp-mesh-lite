@@ -265,11 +265,10 @@ esp32c61_build:
     # rainmaker does not support C61 yet
     # - *build_rainmaker_example
 
-push_master_to_github:
+push_to_github:
   stage: deploy
   only:
-    - master
-    - /^release\/v/
+    - /^release\/v(1\.\d+(\.\d+)*|[0-9]{2,}\.\d+(\.\d+)*)/
 #  when: on_success
   image: $CI_DOCKER_REGISTRY/esp32-ci-env
   variables:
