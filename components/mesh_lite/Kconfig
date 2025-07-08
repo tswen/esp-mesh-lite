@@ -245,6 +245,23 @@ menu "ESP Wi-Fi Mesh Lite"
             default 360
     endmenu
 
+    choice MESH_LITE_PROTO_VERSION
+        bool "Mesh-Lite protocol version"
+        default MESH_LITE_PROTO_VERSION_V1X
+        help
+            Select the version of Mesh-Lite protocol.
+
+        config MESH_LITE_PROTO_VERSION_V1X
+            bool "Version 1.0"
+            help
+                Use Mesh-Lite protocol version 1.0.
+
+        config MESH_LITE_PROTO_VERSION_V0X
+            bool "Version 0.2"
+            help
+                Use Mesh-Lite protocol version 0.2.
+    endchoice
+
     config MESH_LITE_WIRELESS_DEBUG
         bool "Enabel Wireless Debug"
         default n

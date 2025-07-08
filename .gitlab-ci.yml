@@ -43,11 +43,16 @@ default:
       if [ "$example" == "mesh_local_control" ]; then
         git checkout -- .
         git clean -xdff
-        echo -e "\nCONFIG_MESH_LITE_NODE_INFO_REPORT=y" >> sdkconfig.defaults.${idf_target}
-        echo -e "\nCONFIG_ESP_MESH_LITE_OTA_ENABLE=y" >> sdkconfig.defaults.${idf_target}
-        echo -e "\nCONFIG_MESH_LITE_WIRELESS_DEBUG=y" >> sdkconfig.defaults.${idf_target}
+        echo -e "\nCONFIG_MESH_LITE_NODE_INFO_REPORT=y" >> sdkconfig.defaults
+        echo -e "\nCONFIG_ESP_MESH_LITE_OTA_ENABLE=y" >> sdkconfig.defaults
+        echo -e "\nCONFIG_MESH_LITE_WIRELESS_DEBUG=y" >> sdkconfig.defaults
       fi
 
+      idf.py ${compile_option} set-target ${idf_target}
+      idf.py build
+
+      rm -rf build sdkconfig
+      echo -e "\nCONFIG_MESH_LITE_PROTO_VERSION_V0X=y" >> sdkconfig.defaults
       idf.py ${compile_option} set-target ${idf_target}
       idf.py build
       cd -
@@ -58,6 +63,10 @@ default:
   - rm -rf build sdkconfig
   - idf.py ${compile_option} set-target ${idf_target}
   - idf.py build
+  - rm -rf build sdkconfig
+  - echo -e "\nCONFIG_MESH_LITE_PROTO_VERSION_V0X=y" >> sdkconfig.defaults
+  - idf.py ${compile_option} set-target ${idf_target}
+  - idf.py build
   - cd -
 
 .build_rainmaker_example: &build_rainmaker_example
@@ -66,6 +75,10 @@ default:
       for example in led_light provisioning_controller; do
         cd examples/rainmaker/${example}
         rm -rf build sdkconfig
+        idf.py ${compile_option} set-target ${idf_target}
+        idf.py build
+        rm -rf build sdkconfig
+        echo -e "\nCONFIG_MESH_LITE_PROTO_VERSION_V0X=y" >> sdkconfig.defaults
         idf.py ${compile_option} set-target ${idf_target}
         idf.py build
         cd -
