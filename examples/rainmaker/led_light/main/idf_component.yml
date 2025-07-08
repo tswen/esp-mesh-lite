@@ -12,7 +12,7 @@ dependencies:
   wifi_provisioning:
     path: components/wifi_provisioning
     git: https://github.com/espressif/esp-mesh-lite.git
-    version: 3d80e05e
+    version: f633825
 
   gpio_button:
     path: examples/common/gpio_button

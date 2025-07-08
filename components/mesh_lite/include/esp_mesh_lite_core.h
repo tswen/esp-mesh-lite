@@ -114,7 +114,7 @@ typedef esp_err_t (*raw_msg_process_cb_t)(uint8_t *data, uint32_t len, uint8_t *
  */
 typedef struct {
     char *fw_version;        /**< Pointer to firmware version string. */
-    int filesize;            /**< Total size of the file being transferred in bytes.
+    int total_filesize;      /**< Total size of the file being transferred in bytes.
                               *   Note: this data size may be larger than the `size` parameter passed to `esp_mesh_lite_transmit_file_start`,
                               *   as this value is calculated by aligning the `size` parameter to 64KB boundaries. */
     size_t offset;           /**< Current offset position within the file for this transfer operation. */
@@ -452,33 +452,32 @@ esp_err_t esp_mesh_lite_set_disallowed_level(uint8_t level);
 /**
  * @brief  Set router information
  *
- * @attention  1. Please call this API after  `esp_mesh_lite_init`
- * @attention  2. Please call this API before `esp_mesh_lite_start`
+ * This function configures the router settings for the ESP-Mesh-Lite node.
+ * It allows setting parameters like SSID, password, and other connection details
+ * needed to connect to a router.
  *
- * @param[in]  conf
+ * @param[in]  conf  Pointer to mesh_lite_sta_config_t structure containing router configuration
+ *                   parameters like SSID, password, etc.
  *
+ * @return
+ *     - ESP_OK: Router configuration was set successfully
  */
 esp_err_t esp_mesh_lite_set_router_config(mesh_lite_sta_config_t *conf);
 
 /**
  * @brief  Whether to allow other nodes to join the mesh network.
  *
- * @attention  1. Please call this API after `esp_mesh_lite_init`
- * @attention  2. Please call this API before `esp_mesh_lite_start`
- * @attention  3. When disallowing new devices to join, it's recommended to set
+ * @attention  1. When disallowing new devices to join, it's recommended to set
  *              the same argot value via `esp_mesh_lite_set_argot` for all devices
  *              in the same Mesh network to ensure proper network maintenance.
  *
  * @param[in]  enable: true -> allow; false -> disallow
  *
  */
-esp_err_t esp_mesh_lite_allow_others_to_join(bool enable);
+void esp_mesh_lite_allow_others_to_join(bool enable);
 
 /**
  * @brief  Set argot number.
- *
- * @attention  1. Please call this API after  `esp_mesh_lite_init`
- * @attention  2. Please call this API before `esp_mesh_lite_start`
  *
  * @param[in]  argot
  *
@@ -559,6 +558,15 @@ esp_err_t esp_mesh_lite_set_networking_mode(esp_mesh_lite_networking_mode_t mode
  *       Ensure that ESP-Mesh-Lite has been initialized before calling this function.
  */
 void esp_mesh_lite_set_router_min_rssi_threshold(int8_t rssi_min);
+
+/**
+ * @brief Set the maximum number of child nodes that can connect to this node
+ *
+ * This function sets the maximum number of child nodes that can connect to the current node.
+ *
+ * @param[in] max_connection Maximum number of child nodes allowed to connect
+ */
+void esp_mesh_lite_set_max_connected_station_number(uint8_t max_connection);
 
 /**
  * @brief  Set Node as leaf node.
