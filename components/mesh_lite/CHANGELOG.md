@@ -2,7 +2,7 @@
 
 # ChangeLog
 
-## v2.0.0-dev - 2025-7-8
+## v2.0.0-dev - 2025-7-11
 
 ### Breaking Change:
 
@@ -16,6 +16,8 @@
 
 #### Version 1.0 Fixes
 
+- Fixed the issue where devices with RSSI values between the threshold set by esp_mesh_lite_set_router_min_rssi_threshold and the route mode threshold set by esp_mesh_lite_set_networking_mode cannot connect to the router when the former threshold is higher
+- Fixed the issue where the threshold set by esp_mesh_lite_set_router_min_rssi_threshold does not take effect under certain extreme conditions
 - Fixed the issue where LAN OTA file transfer fails when the OTA_DATA_LEN configuration differs between the firmware requester and provider
 
 ## v1.0.2 - 2025-7-4

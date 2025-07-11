@@ -1,6 +1,6 @@
 # ChangeLog
 
-## v2.0.0-dev - 2025-7-8
+## v2.0.0-dev - 2025-7-11
 
 ### Breaking Change:
 
@@ -14,6 +14,8 @@
 
 #### Version 1.0 修复
 
+- 修复当 esp_mesh_lite_set_router_min_rssi_threshold 设置的阈值高于 esp_mesh_lite_set_networking_mode 设置的 route mode 阈值时，RSSI 处于这两个阈值之间的设备无法连接路由器的问题
+- 修复 esp_mesh_lite_set_router_min_rssi_threshold 设置的阈值在某些极端条件下不生效的问题
 - LAN OTA 文件传输时，当请求固件一方与提供固件一方的 OTA_DATA_LEN 配置不同，导致传输失败的问题
 
 ## v1.0.2 - 2025-7-4
