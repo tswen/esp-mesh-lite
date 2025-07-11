@@ -535,8 +535,16 @@ esp_err_t esp_mesh_lite_set_softap_info(const char* softap_ssid, const char* sof
  *
  * @param mode           Networking mode to set (either ESP_MESH_LITE_ROUTER or ESP_MESH_LITE_MESH).
  * @param rssi_threshold RSSI threshold for router mode. Only effective when mode is ESP_MESH_LITE_ROUTER.
- *                       If the router's signal strength is below this threshold, the device will connect to a mesh node.
- * @return esp_err_t ESP_OK on success, or an error code indicating the reason for failure.
+ *
+ * @note If the router's signal strength is below this threshold, the device will connect to a mesh node.
+ *       This threshold must be greater than or equal to the minimum router RSSI thresholdset via
+ *       esp_mesh_lite_set_router_min_rssi_threshold().
+ *       If the rssi_threshold is lower than the value set by esp_mesh_lite_set_router_min_rssi_threshold(),
+ *       mesh lite will automatically adjust the router mode rssi_threshold to match the value set by
+ *       esp_mesh_lite_set_router_min_rssi_threshold().
+ *
+ * @return
+ *      - ESP_OK: Success
  */
 esp_err_t esp_mesh_lite_set_networking_mode(esp_mesh_lite_networking_mode_t mode, int8_t rssi_threshold);
 
@@ -556,6 +564,13 @@ esp_err_t esp_mesh_lite_set_networking_mode(esp_mesh_lite_networking_mode_t mode
  * @note This function allows customization of the threshold according to specific requirements.
  *       The threshold set by this function only takes effect when the device attempts to connect to a router.
  *       Ensure that ESP-Mesh-Lite has been initialized before calling this function.
+ *       When in Router mode, the threshold must be less than or equal to the Router mode's minimum RSSI threshold.
+ *       If the rssi_min set is higher than the rssi_threshold set by esp_mesh_lite_set_networking_mode(),
+ *       mesh lite will automatically adjust connect_router_rssi_min to match the rssi_threshold set by
+ *       esp_mesh_lite_set_networking_mode().
+ *
+ * @return
+ *      - ESP_OK: Success
  */
 void esp_mesh_lite_set_router_min_rssi_threshold(int8_t rssi_min);
 
