@@ -22,10 +22,6 @@ The ESP Mesh-Lite Provisioning APP requires the customer to compile it themselve
 
 ESP-Mesh-Lite is developed based on ESP-IDF functions and tools. Therefore, the ESP-IDF development environment must be set up first. You can refer to [Setting up Development Environment](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/index.html) for detailed steps. Afterward, you can build the example directly in ESP-Mesh-Lite, similar to building the example in ESP-IDF.
 
-### IDF configuration device
-
-It is recommended to use v5.0.7, v5.1.5, v5.2.3, v5.3.1 and previous tag versions
-
 ### Build and Flash and Monitor
 
 CMake:

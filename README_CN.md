@@ -8,5 +8,8 @@ ESP-MESH-LITE 是以 [IoT-Bridge](https://github.com/espressif/esp-iot-bridge) �
 
 在 [examples](https://github.com/espressif/esp-mesh-lite/blob/master/examples) 目录下，实现了一些常见应用场景的 demo，可供用户快速集成到自己的应用项目中。
 
-- [examples/mesh_local_control](examples/mesh_local_control)：本示例仅简单演示设备组网，以及 TCP 通信，不包含复杂的网络应用，用户可基于此示例进行二次开发。
-- [examples/rainmaker/led_light](examples/rainmaker/led_light)：本示例将 Mesh 功能集成到 Rainmaker 应用中，用户可通过 `Nova Home` APP 来为设备配网并使设备成功连接至 Rainmaker 云端，设备本身基于 Rainmaker 实现自身连接云端的同时，还可以为其他无线设备提供无线上网的能力，搭配 Mesh-Lite 功能形成组网，极大程度上减轻路由器承载压力，同时扩大了无线通信范围。
+- [examples/mesh_local_control](examples/mesh_local_control)：本示例仅简单演示设备组网以及 TCP 通信，不包含复杂的网络应用，用户可基于此示例进行二次开发。
+- [examples/mesh_wifi_provisioning](examples/mesh_wifi_provisioning)：本示例演示了如何使用 ESP-MESH-LITE 进行 Wi-Fi 配网（Wi-Fi Provisioning + 零配置），用户可通过 APP 为设备配网并使设备成功连接至 Wi-Fi 网络。
+- [examples/no_router](examples/no_router)：本示例演示了在没有路由器的情况下，如何使用 ESP-MESH-LITE 进行组网并实现设备之间的通信。
+- [examples/rainmaker/led_light](examples/rainmaker/led_light)：本示例将 Mesh 功能集成到 Rainmaker 应用中，用户可通过 `Nova Home` APP 为设备配网并使设备成功连接至 Rainmaker 云端。设备本身基于 Rainmaker 实现连接云端的同时，还可以为其他无线设备提供上网能力，搭配 Mesh-Lite 功能形成组网，极大程度上减轻路由器负载压力，同时扩大无线通信范围。
+- [examples/wireless_debug](examples/wireless_debug)：本示例演示了如何使用 ESP-MESH-LITE 进行无线调试，用户可通过向调试设备发送相应命令来获取调试信息。
