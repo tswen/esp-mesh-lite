@@ -10,7 +10,7 @@ It introduces a quick way to build an ESP-Mesh-Lite network without a router. Fo
 
 To run this example, you need at least two development boards, one configured as a root node, and the other a non-root node. In this example, all the devices are non-root nodes by default.
 
-- Root node: There is only one root node in an ESP-Mesh-Lite network. `MESH-LITE` networks can be differentiated by their `MESH_LITE_ID` and channels.
+- Root node: There is only one root node in an ESP-Mesh-Lite network. `MESH-LITE` networks can be differentiated by their `MESH_LITE_ID`.
 - Non-root node: Includes leaf nodes and intermediate nodes, which automatically select their parent nodes according to the network conditions.
 	- Leaf node: A leaf node cannot also be an intermediate node, which means leaf node cannot has any child nodes.
 
