@@ -1,22 +1,23 @@
 # ChangeLog
 
-## v2.0.0-dev - 2025-7-11
+## v2.0.0-dev - 2025-7-21
 
 ### Breaking Change:
 
-- 新增 Mesh Lite Proto 1.0 版本，用于拓展更多功能以及修复一些特定 bug
+- 新增 Mesh Lite Proto 1.0 版本，用于拓展更多功能以及修复一些特定 bug ([a815056](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/a81505653b50549a4b48abf2f0e3435603d550b1))
 
 ### 功能:
 
 #### Version 1.0 功能
 
-- 支持组网区分 SSID 相同，但 PASSWORD 不同的路由器
+- 新增支持 ESP-IDF v5.5 版本，不再支持已停止维护的 ESP-IDF v5.0 版本 ([883438e](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/883438e26330dc111c6e0c00ba5db62943db48d7))
+- 支持组网区分 SSID 相同，但 PASSWORD 不同的路由器 ([a815056](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/a81505653b50549a4b48abf2f0e3435603d550b1))
 
 #### Version 1.0 修复
 
-- 修复当 esp_mesh_lite_set_router_min_rssi_threshold 设置的阈值高于 esp_mesh_lite_set_networking_mode 设置的 route mode 阈值时，RSSI 处于这两个阈值之间的设备无法连接路由器的问题
-- 修复 esp_mesh_lite_set_router_min_rssi_threshold 设置的阈值在某些极端条件下不生效的问题
-- LAN OTA 文件传输时，当请求固件一方与提供固件一方的 OTA_DATA_LEN 配置不同，导致传输失败的问题
+- 修复当 esp_mesh_lite_set_router_min_rssi_threshold 设置的阈值高于 esp_mesh_lite_set_networking_mode 设置的 route mode 阈值时，RSSI 处于这两个阈值之间的设备无法连接路由器的问题 ([3622003](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/36220033ebe0996e6da0cd77b558deb3ee1d3ddb))
+- 修复 esp_mesh_lite_set_router_min_rssi_threshold 设置的阈值在某些极端条件下不生效的问题 ([3622003](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/36220033ebe0996e6da0cd77b558deb3ee1d3ddb))
+- LAN OTA 文件传输时，当请求固件一方与提供固件一方的 OTA_DATA_LEN 配置不同，导致传输失败的问题 ([a815056](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/a81505653b50549a4b48abf2f0e3435603d550b1))
 
 ## v1.0.2 - 2025-7-4
 
