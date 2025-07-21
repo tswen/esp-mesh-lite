@@ -16,9 +16,10 @@
 - Add support for ESP-IDF v5.5, and remove support for ESP-IDF v5.0 that is no longer maintained ([883438e](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/883438e26330dc111c6e0c00ba5db62943db48d7))
 - Support distinguishing routers with the same SSID but different passwords during networking ([a815056](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/a81505653b50549a4b48abf2f0e3435603d550b1))
 
-
 #### Version 1.0 Fixes
 
+- Fixed device legitimacy check mechanism to prevent misjudgment causing child nodes to be incorrectly removed from the network, and optimized some code ([4ef42e8](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/4ef42e8e6ab917b116c886a65c25100580e43956))
+- Fixed the issue where the number of mesh stations under a node exceeds the set maximum mesh connection limit, and optimized some code ([4ef42e8](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/4ef42e8e6ab917b116c886a65c25100580e43956))
 - Fixed the issue where devices with RSSI values between the threshold set by esp_mesh_lite_set_router_min_rssi_threshold and the route mode threshold set by esp_mesh_lite_set_networking_mode cannot connect to the router when the former threshold is higher ([3622003](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/36220033ebe0996e6da0cd77b558deb3ee1d3ddb))
 - Fixed the issue where the threshold set by esp_mesh_lite_set_router_min_rssi_threshold does not take effect under certain extreme conditions ([3622003](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/36220033ebe0996e6da0cd77b558deb3ee1d3ddb))
 - Fixed the issue where LAN OTA file transfer fails when the OTA_DATA_LEN configuration differs between the firmware requester and provider ([a815056](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/a81505653b50549a4b48abf2f0e3435603d550b1))

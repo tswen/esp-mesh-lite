@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2023-2025 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -116,3 +116,13 @@ esp_err_t esp_mesh_lite_get_ap_config(mesh_lite_ap_config_t *cfg)
 
     return ESP_OK;
 }
+
+#if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)) && (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 5, 0))
+void dhcp_parse_extra_opts_internal(struct dhcp *dhcp, uint8_t state, uint8_t option, uint8_t len, struct pbuf *p, uint16_t offset)
+{
+    void __real_dhcp_parse_extra_opts_internal(struct dhcp * dhcp, uint8_t state, uint8_t option, uint8_t len, struct pbuf * p, uint16_t offset);
+    __real_dhcp_parse_extra_opts_internal(dhcp, state, option, len, p, offset);
+    void lwip_dhcp_on_extra_option(struct dhcp * dhcp, uint8_t state, uint8_t option, uint8_t len, struct pbuf * p, uint16_t offset);
+    lwip_dhcp_on_extra_option(dhcp, state, option, len, p, offset);
+}
+#endif

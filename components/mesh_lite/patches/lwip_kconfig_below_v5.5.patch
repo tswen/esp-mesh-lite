@@ -1,0 +1,12 @@
+diff --git a/components/lwip/Kconfig b/components/lwip/Kconfig
+index 574025461d..a55304df73 100644
+--- a/components/lwip/Kconfig
++++ b/components/lwip/Kconfig
+@@ -355,6 +355,7 @@ menu "LWIP"
+     config LWIP_DHCP_DISABLE_VENDOR_CLASS_ID
+         bool "DHCP: Disable Use of vendor class identification"
+         default y
++        depends on !MESH_LITE_ENABLE
+         depends on LWIP_IPV4
+         help
+             This option could be used to disable DHCP client vendor class identification.

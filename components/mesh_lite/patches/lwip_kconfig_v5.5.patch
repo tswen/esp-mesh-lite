@@ -1,0 +1,20 @@
+diff --git a/components/lwip/Kconfig b/components/lwip/Kconfig
+index ecf53f8c80..efc7477e68 100644
+--- a/components/lwip/Kconfig
++++ b/components/lwip/Kconfig
+@@ -347,6 +347,7 @@ menu "LWIP"
+     config LWIP_DHCP_DISABLE_VENDOR_CLASS_ID
+         bool "DHCP: Disable Use of vendor class identification"
+         default y
++        depends on !MESH_LITE_ENABLE
+         depends on LWIP_IPV4
+         help
+             This option could be used to disable DHCP client vendor class identification.
+@@ -1327,6 +1328,7 @@ menu "LWIP"
+ 
+         choice LWIP_HOOK_DHCP_EXTRA_OPTION
+             prompt "DHCP extra option hook"
++            default LWIP_HOOK_DHCP_EXTRA_OPTION_DEFAULT if MESH_LITE_ENABLE
+             default LWIP_HOOK_DHCP_EXTRA_OPTION_NONE
+             help
+                 Enables custom hook to receive and parse extra DHCP options.
