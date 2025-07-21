@@ -15,6 +15,8 @@
 
 #### Version 1.0 修复
 
+- 修复设备合法性检查机制，避免误判导致子节点被错误移除出网络，同时优化一些代码 ([4ef42e8](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/4ef42e8e6ab917b116c886a65c25100580e43956))
+- 修复节点下 mesh station 数量超过设置的 mesh 最大连接数量，同时优化一些代码 ([4ef42e8](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/4ef42e8e6ab917b116c886a65c25100580e43956))
 - 修复当 esp_mesh_lite_set_router_min_rssi_threshold 设置的阈值高于 esp_mesh_lite_set_networking_mode 设置的 route mode 阈值时，RSSI 处于这两个阈值之间的设备无法连接路由器的问题 ([3622003](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/36220033ebe0996e6da0cd77b558deb3ee1d3ddb))
 - 修复 esp_mesh_lite_set_router_min_rssi_threshold 设置的阈值在某些极端条件下不生效的问题 ([3622003](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/36220033ebe0996e6da0cd77b558deb3ee1d3ddb))
 - LAN OTA 文件传输时，当请求固件一方与提供固件一方的 OTA_DATA_LEN 配置不同，导致传输失败的问题 ([a815056](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/a81505653b50549a4b48abf2f0e3435603d550b1))
