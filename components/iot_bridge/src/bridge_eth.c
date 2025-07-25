@@ -174,15 +174,17 @@ esp_err_t esp_bridge_eth_init(esp_netif_t* eth_netif)
         }
     }
 
+    if (ret == ESP_OK) {
     /* attach Ethernet driver to TCP/IP stack */
 #if defined(CONFIG_BRIDGE_NETIF_ETHERNET_AUTO_WAN_OR_LAN)
-    ESP_ERROR_CHECK(esp_netif_attach(eth_netif, esp_bridge_eth_new_netif_glue(eth_handle)));
+        ESP_ERROR_CHECK(esp_netif_attach(eth_netif, esp_bridge_eth_new_netif_glue(eth_handle)));
 #else
-    ESP_ERROR_CHECK(esp_netif_attach(eth_netif, esp_eth_new_netif_glue(eth_handle)));
+        ESP_ERROR_CHECK(esp_netif_attach(eth_netif, esp_eth_new_netif_glue(eth_handle)));
 #endif
 
-    /* start Ethernet driver state machine */
-    esp_eth_start(eth_handle);
+        /* start Ethernet driver state machine */
+        esp_eth_start(eth_handle);
+    }
 
     return ret;
 }
@@ -434,11 +436,18 @@ esp_netif_t* esp_bridge_create_eth_netif(esp_netif_ip_info_t* ip_info, uint8_t m
         }
 #endif
         esp_netif_action_stop(netif, NULL, 0, NULL);
+        esp_err_t ret = ESP_FAIL;
 #if CONFIG_BRIDGE_USE_INTERNAL_ETHERNET
-        esp_bridge_eth_init(netif);
+        ret = esp_bridge_eth_init(netif);
 #elif CONFIG_BRIDGE_USE_SPI_ETHERNET
-        esp_bridge_eth_spi_init(netif);
+        ret = esp_bridge_eth_spi_init(netif);
 #endif
+
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to initialize Ethernet driver");
+            return NULL;
+        }
+
         esp_netif_up(netif);
 
         ESP_LOGI(TAG, "[%-12s]", esp_netif_get_ifkey(netif));
