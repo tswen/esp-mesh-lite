@@ -71,19 +71,17 @@ default:
 
 .build_rainmaker_example: &build_rainmaker_example
   - >
-    if [ "$IMAGE" != "espressif/idf:release-v5.4" ]; then
-      for example in led_light provisioning_controller; do
-        cd examples/rainmaker/${example}
-        rm -rf build sdkconfig
-        idf.py ${compile_option} set-target ${idf_target}
-        idf.py build
-        rm -rf build sdkconfig
-        echo -e "\nCONFIG_MESH_LITE_PROTO_VERSION_V0X=y" >> sdkconfig.defaults
-        idf.py ${compile_option} set-target ${idf_target}
-        idf.py build
-        cd -
-      done
-    fi
+    for example in led_light provisioning_controller; do
+      cd examples/rainmaker/${example}
+      rm -rf build sdkconfig
+      idf.py ${compile_option} set-target ${idf_target}
+      idf.py build
+      rm -rf build sdkconfig
+      echo -e "\nCONFIG_MESH_LITE_PROTO_VERSION_V0X=y" >> sdkconfig.defaults
+      idf.py ${compile_option} set-target ${idf_target}
+      idf.py build
+      cd -
+    done
 
 .pre_check_template:
   stage: pre_check
@@ -261,7 +259,7 @@ esp32c61_build:
   image: $IMAGE
   parallel:
     matrix:
-      - IMAGE: ['espressif/idf:release-v5.4', 'espressif/idf:release-v5.5']
+      - IMAGE: ['espressif/idf:release-v5.5']
 
   variables:
     <<: *global-variables

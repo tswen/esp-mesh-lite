@@ -162,13 +162,13 @@ void esp_now_remove_send_msgs(void)
 /* ESPNOW sending or receiving callback function is called in WiFi task.
  * Users should not do lengthy operations from this task. Instead, post
  * necessary data to a queue and handle it from a lower priority task. */
-#if ESP_IDF_VERSION > ESP_IDF_VERSION_VAL(5, 4, 1)
+#if ESP_IDF_VERSION > ESP_IDF_VERSION_VAL(5, 4, 2)
 static void espnow_send_cb(const esp_now_send_info_t *tx_info, esp_now_send_status_t status)
 #else
 static void espnow_send_cb(const uint8_t *mac_addr, esp_now_send_status_t status)
 #endif
 {
-#if ESP_IDF_VERSION > ESP_IDF_VERSION_VAL(5, 4, 1)
+#if ESP_IDF_VERSION > ESP_IDF_VERSION_VAL(5, 4, 2)
     const uint8_t *mac_addr = tx_info->des_addr;
     if (tx_info == NULL) {
 #else

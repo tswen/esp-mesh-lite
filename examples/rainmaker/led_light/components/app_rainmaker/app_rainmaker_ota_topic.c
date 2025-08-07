@@ -6,7 +6,9 @@
 
 #include "string.h"
 #include "esp_log.h"
+#include "esp_rmaker_core.h"
 #include "esp_rmaker_ota.h"
+#include "esp_rmaker_mqtt.h"
 #include "app_rainmaker_ota.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/event_groups.h"
@@ -31,9 +33,11 @@ typedef struct {
 
 static const char *TAG = "app_rainmaker_ota_topic";
 
-extern void esp_rmaker_ota_common_cb(void *priv);
 static esp_rmaker_ota_t *ota_info = NULL;
 static esp_rmaker_ota_t *esp_rmaker_ota = NULL;
+
+void esp_rmaker_ota_finish_using_topics(esp_rmaker_ota_t *ota);
+extern void esp_rmaker_ota_common_cb(void *priv);
 
 static esp_err_t esp_mesh_lite_ota_from_extern_url(void)
 {
