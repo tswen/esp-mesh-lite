@@ -26,6 +26,7 @@ static const char *TAG = "app_rainmaker";
 
 esp_rmaker_device_t *light_device;
 
+esp_err_t esp_rmaker_handle_set_params(char *data, size_t data_len, esp_rmaker_req_src_t src);
 extern const char ota_server_cert[] asm("_binary_server_crt_start");
 extern esp_err_t __real_esp_rmaker_handle_set_params(char *data, size_t data_len, esp_rmaker_req_src_t src);
 

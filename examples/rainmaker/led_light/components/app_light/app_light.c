@@ -15,6 +15,7 @@
 #include <app_reset.h>
 #include <app_light.h>
 #include <lightbulb.h>
+#include <app_espnow.h>
 
 static const char *TAG = "app_light";
 
