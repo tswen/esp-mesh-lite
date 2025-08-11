@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2023-2025 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -54,10 +54,13 @@ static void button_press_up_cb(void *hardware_data, void *usr_data)
 {
     ESP_LOGI(TAG, "BTN: BUTTON_PRESS_UP");
 
-    if (button_long_press) {
-        ESP_ERROR_CHECK(esp_timer_stop(restart_timer));
-        button_long_press = false;
+    static bool is_lan = true;
+    if (is_lan) {
+        esp_bridge_spi_set_netif_type(IOT_BRIDGE_NETIF_LAN);
+    } else {
+        esp_bridge_spi_set_netif_type(IOT_BRIDGE_NETIF_WAN);
     }
+    is_lan = !is_lan;
 }
 
 static void button_press_repeat_cb(void *hardware_data, void *usr_data)
