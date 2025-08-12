@@ -31,23 +31,17 @@ menu "ESP Wi-Fi Mesh Lite"
             default 5
             range 1 15
 
-        config MESH_LITE_NODE_INFO_REPORT
-            bool "Enable node info report"
-            default n
-            help
-                Sub-nodes report information regularly,
-                and the root node collects and summarizes the mesh nodes information.
-
-        config MESH_LITE_REPORT_INTERVAL
-            depends on MESH_LITE_NODE_INFO_REPORT
-            int "Report time interval(s)"
-            default 300
-
         config MESH_LITE_MAXIMUM_NODE_NUMBER
-            depends on MESH_LITE_NODE_INFO_REPORT
             int "The maximum node number"
             default 50
             range 1 200
+
+        config MESH_LITE_SOFTAP_INACTIVE_TIME
+            int "The inactive time of the SoftAP"
+            default 10
+            range 10 300
+            help
+                The inactive time of the SoftAP.
 
         config JOIN_MESH_WITHOUT_CONFIGURED_WIFI_INFO
             bool "Join Mesh without configured with information"

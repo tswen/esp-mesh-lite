@@ -33,7 +33,7 @@ esp_err_t app_rmaker_mesh_lite_report_child_info(void)
 {
     uint8_t mac[6];
     cJSON *item = NULL;
-    char mac_str[MAC_MAX_LEN];
+    char mac_str[MAC_STR_MAX_LEN];
 
     esp_wifi_get_mac(WIFI_IF_STA, mac);
     snprintf(mac_str, sizeof(mac_str), MACSTR, MAC2STR(mac));
@@ -71,7 +71,7 @@ static esp_err_t esp_mesh_lite_child_node_info_add(uint8_t level, char* mac, cha
     app_node_info_list_t* new = app_node_info_list;
 
     while (new) {
-        if (!strncmp(new->node->mac, mac, (MAC_MAX_LEN - 1))) {
+        if (!strncmp(new->node->mac, mac, (MAC_STR_MAX_LEN - 1))) {
             new->ttl = (120 + 10);
             xSemaphoreGive(report_child_info_mutex);
             return ESP_ERR_DUPLICATE_ADDITION;
@@ -95,7 +95,7 @@ static esp_err_t esp_mesh_lite_child_node_info_add(uint8_t level, char* mac, cha
         return ESP_ERR_NO_MEM;
     }
 
-    memcpy(new->node->mac, mac, MAC_MAX_LEN);
+    memcpy(new->node->mac, mac, MAC_STR_MAX_LEN);
     memcpy(new->node->ip, ip, IP_MAX_LEN);
     new->node->level = level;
     new->ttl = (120 + 10);

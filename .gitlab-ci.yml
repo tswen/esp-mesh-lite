@@ -43,7 +43,6 @@ default:
       if [ "$example" == "mesh_local_control" ]; then
         git checkout -- .
         git clean -xdff
-        echo -e "\nCONFIG_MESH_LITE_NODE_INFO_REPORT=y" >> sdkconfig.defaults
         echo -e "\nCONFIG_ESP_MESH_LITE_OTA_ENABLE=y" >> sdkconfig.defaults
         echo -e "\nCONFIG_MESH_LITE_WIRELESS_DEBUG=y" >> sdkconfig.defaults
       fi

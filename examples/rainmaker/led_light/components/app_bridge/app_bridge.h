@@ -19,7 +19,7 @@ typedef enum {
 typedef struct app_node_info {
     uint8_t level;
     char ip[IP_MAX_LEN];
-    char mac[MAC_MAX_LEN];
+    char mac[MAC_STR_MAX_LEN];
 } app_node_info_t;
 
 /* Enable ESP IoT Bridge in the application
