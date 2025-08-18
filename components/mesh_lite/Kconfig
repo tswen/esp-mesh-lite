@@ -248,12 +248,13 @@ menu "ESP Wi-Fi Mesh Lite"
         config MESH_LITE_PROTO_VERSION_V1X
             bool "Version 1.0"
             help
-                Use Mesh-Lite protocol version 1.0.
+                Use Mesh-Lite protocol version 1.0. Supported since branch release/v1.0 (d61b2a1470a478cdce89a5623dcbcf3d76397007).
 
         config MESH_LITE_PROTO_VERSION_V0X
             bool "Version 0.2"
             help
-                Use Mesh-Lite protocol version 0.2.
+                Use Mesh-Lite protocol version 0.2. This version is mainly used for compatibility with versions prior to release/v1.0 (d61b2a1470a478cdce89a5623dcbcf3d76397007).
+                However, this version is not compatible with version 1.0. If you're designing new products, we strongly recommend using version 1.0.
     endchoice
 
     config MESH_LITE_WIRELESS_DEBUG
