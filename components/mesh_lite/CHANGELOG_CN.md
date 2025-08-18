@@ -1,6 +1,6 @@
 # ChangeLog
 
-## v2.0.0-dev - 2025-8-11
+## v2.0.0-dev - 2025-8-18
 
 ### Breaking Change:
 
@@ -10,19 +10,29 @@
 
 #### Version 1.0 功能
 
-- 新增支持获取整个 Mesh 网络拓扑的功能 ([3604e71](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/9befdce64cd6d266649ab89e6b8486eca81d6d13))
+- 新增支持获取整个 Mesh 网络拓扑的功能 ([9befdce](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/9befdce64cd6d266649ab89e6b8486eca81d6d13))
 - 新增支持 ESP-IDF v5.5 版本，不再支持已停止维护的 ESP-IDF v5.0 版本 ([883438e](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/883438e26330dc111c6e0c00ba5db62943db48d7))
 - 支持组网区分 SSID 相同，但 PASSWORD 不同的路由器 ([a815056](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/a81505653b50549a4b48abf2f0e3435603d550b1))
 
 #### Version 1.0 修复
 
-- 修复当发送 raw data 的 msg_id 与 resp_msg_id 与前一次发送相同时，未移除前一次发送的问题 ([3604e71](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/9befdce64cd6d266649ab89e6b8486eca81d6d13))
-- 修复第一继承设备 Station 断开后，未重连源父节点，而是直接连接路由器的问题 ([3604e71](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/9befdce64cd6d266649ab89e6b8486eca81d6d13))
+- 修复使用 esp_mesh_lite_set_leaf_node_softap_status API 动态设置叶子节点 softap 状态失败的问题 ([47bc04f](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/47bc04f5f0dd5392bb76cbe2ef895a9e67862ba2))
+- 修复当设置 AES 加密通信时，C61 设备通信解密失败的问题 ([47bc04f](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/47bc04f5f0dd5392bb76cbe2ef895a9e67862ba2))
+- 修复特殊场景下，子节点无法连上父节点的问题 ([47bc04f](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/47bc04f5f0dd5392bb76cbe2ef895a9e67862ba2))
+- 修复：当 station 断开连接后，将 level 重置为 1 ([47bc04f](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/47bc04f5f0dd5392bb76cbe2ef895a9e67862ba2))
+- 修复当 mesh 设备不允许其他设备加入时，之前连接过 mesh 设备 softap 的手机仍能加入网络的问题 ([47bc04f](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/47bc04f5f0dd5392bb76cbe2ef895a9e67862ba2))
+- 修复 wireless debug 功能无法接收无线 debug 日志的问题 ([2521fa0](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/2521fa00126d17b4cfa0b99b42bfbee7d9946ff8))
+- 修复当发送 raw data 的 msg_id 与 resp_msg_id 与前一次发送相同时，未移除前一次发送的问题 ([9befdce](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/9befdce64cd6d266649ab89e6b8486eca81d6d13))
+- 修复第一继承设备 Station 断开后，未重连源父节点，而是直接连接路由器的问题 ([9befdce](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/9befdce64cd6d266649ab89e6b8486eca81d6d13))
 - 修复设备合法性检查机制，避免误判导致子节点被错误移除出网络，同时优化一些代码 ([4ef42e8](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/4ef42e8e6ab917b116c886a65c25100580e43956))
 - 修复节点下 mesh station 数量超过设置的 mesh 最大连接数量，同时优化一些代码 ([4ef42e8](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/4ef42e8e6ab917b116c886a65c25100580e43956))
 - 修复当 esp_mesh_lite_set_router_min_rssi_threshold 设置的阈值高于 esp_mesh_lite_set_networking_mode 设置的 route mode 阈值时，RSSI 处于这两个阈值之间的设备无法连接路由器的问题 ([3622003](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/36220033ebe0996e6da0cd77b558deb3ee1d3ddb))
 - 修复 esp_mesh_lite_set_router_min_rssi_threshold 设置的阈值在某些极端条件下不生效的问题 ([3622003](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/36220033ebe0996e6da0cd77b558deb3ee1d3ddb))
 - LAN OTA 文件传输时，当请求固件一方与提供固件一方的 OTA_DATA_LEN 配置不同，导致传输失败的问题 ([a815056](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/a81505653b50549a4b48abf2f0e3435603d550b1))
+
+#### Version 1.0 优化
+
+- 优化：执行 esp_mesh_lite_connect 时，如果未扫描到路由器以及合适父节点，post disconnect（reason：no_ap_found）事件 ([47bc04f](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/47bc04f5f0dd5392bb76cbe2ef895a9e67862ba2))
 
 ## v1.0.2 - 2025-7-4
 
