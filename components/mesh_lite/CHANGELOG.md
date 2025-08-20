@@ -2,7 +2,7 @@
 
 # ChangeLog
 
-## v2.0.0-dev - 2025-8-18
+## v2.0.0-dev - 2025-8-20
 
 ### Breaking Change:
 
@@ -13,6 +13,7 @@
 
 #### Version 1.0 Features
 
+- Added RSSI information for each device's parent node when obtaining Mesh network topology information ([c913d81](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/c913d812b4d0df980a30b7368c3f481fdf9ce6c1))
 - Add support for obtaining the entire Mesh network topology ([9befdce](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/9befdce64cd6d266649ab89e6b8486eca81d6d13))
 - Add support for ESP-IDF v5.5, and remove support for ESP-IDF v5.0 that is no longer maintained ([883438e](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/883438e26330dc111c6e0c00ba5db62943db48d7))
 - Support distinguishing routers with the same SSID but different passwords during networking ([a815056](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/a81505653b50549a4b48abf2f0e3435603d550b1))
