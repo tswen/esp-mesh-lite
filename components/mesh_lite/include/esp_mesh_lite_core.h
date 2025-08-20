@@ -382,6 +382,7 @@ typedef struct esp_mesh_lite_node_info {
     uint32_t ip_addr;                      /**< IPv4 address assigned to this node */
     uint8_t  mac_valid_tail_bytes;         /**< Number of valid bytes from the end of MAC address used for node identification */
     uint8_t  mac_addr[HWADDR_LEN];         /**< Hardware MAC address of the node's network interface */
+    int32_t  parent_rssi;                  /**< RSSI value from parent node */
 } esp_mesh_lite_node_info_t;
 
 /**
@@ -397,6 +398,19 @@ typedef struct esp_mesh_lite_tree_structure {
     struct esp_mesh_lite_tree_structure* first_child;   /**< Pointer to the first child in the list of children nodes */
     struct esp_mesh_lite_tree_structure* next_sibling;  /**< Pointer to the next sibling at the same level in the tree */
 } esp_mesh_lite_tree_structure_t;
+
+/**
+ * @brief Structure for configuring the RSSI update threshold between the root node and router.
+ *
+ * This structure specifies the RSSI (Received Signal Strength Indicator) range and the fluctuation threshold.
+ * When the RSSI value is within [rssi_min, rssi_max] and the fluctuation exceeds rssi_fluctuation (in dB),
+ * an update will be triggered.
+ */
+typedef struct {
+    int8_t rssi_min;           /**< The lower bound of the RSSI threshold range. */
+    int8_t rssi_max;           /**< The upper bound of the RSSI threshold range. */
+    uint8_t rssi_fluctuation;  /**< RSSI fluctuation threshold (in dB) to trigger an update. */
+} esp_mesh_lite_parent_rssi_update_threshold_t;
 
 /*****************************************************/
 /**************** ESP Wi-Fi Mesh Lite ****************/
@@ -994,6 +1008,32 @@ esp_err_t esp_mesh_lite_set_self_mac_size_for_report(uint8_t len);
  *       device information to protobuf format for transmission
  */
 uint8_t esp_mesh_lite_get_self_mac_size_for_report(void);
+
+/**
+ * @brief Set the RSSI update threshold for the root node and router within specific ranges
+ *
+ * This API is mainly used to configure the RSSI (Received Signal Strength Indicator) fluctuation threshold
+ * for updating when the signal strength between the root node and the router falls within a specified range.
+ * When the RSSI changes beyond the set threshold in the configured range, an update will be triggered.
+ *
+ * By default, the RSSI update threshold is set to 10dB, meaning an update will be triggered only when the RSSI fluctuates by more than 10dB.
+ * You can use this API to customize the fluctuation threshold as needed.
+ *
+ * Usage Example:
+ * @code{.c}
+ * static const esp_mesh_lite_parent_rssi_update_threshold_t rssi_update_list[] = {
+ *     {-55,  -75, 5},
+ * };
+ * esp_mesh_lite_set_parent_rssi_update_threshold(rssi_update_list, sizeof(rssi_update_list) / sizeof(esp_mesh_lite_parent_rssi_update_threshold_t));
+ * @endcode
+ *
+ * @param[in] rssi_update_list  Array of RSSI ranges and their corresponding update thresholds
+ * @param[in] size              Length of the array
+ * @return
+ *     - ESP_OK: Set successfully
+ *     - ESP_ERR_INVALID_ARG: Invalid argument
+ */
+esp_err_t esp_mesh_lite_set_parent_rssi_update_threshold(esp_mesh_lite_parent_rssi_update_threshold_t rssi_update_list[], size_t size);
 
 #ifdef CONFIG_ESP_MESH_LITE_OTA_ENABLE
 /*****************************************************/

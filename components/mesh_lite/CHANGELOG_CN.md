@@ -1,6 +1,6 @@
 # ChangeLog
 
-## v2.0.0-dev - 2025-8-18
+## v2.0.0-dev - 2025-8-20
 
 ### Breaking Change:
 
@@ -10,6 +10,7 @@
 
 #### Version 1.0 功能
 
+- 新增在获取 Mesh 网络拓扑信息时，包含每个设备父节点的 RSSI 信息 ([c913d81](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/c913d812b4d0df980a30b7368c3f481fdf9ce6c1))
 - 新增支持获取整个 Mesh 网络拓扑的功能 ([9befdce](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/9befdce64cd6d266649ab89e6b8486eca81d6d13))
 - 新增支持 ESP-IDF v5.5 版本，不再支持已停止维护的 ESP-IDF v5.0 版本 ([883438e](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/883438e26330dc111c6e0c00ba5db62943db48d7))
 - 支持组网区分 SSID 相同，但 PASSWORD 不同的路由器 ([a815056](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/a81505653b50549a4b48abf2f0e3435603d550b1))
