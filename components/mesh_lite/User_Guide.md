@@ -1,4 +1,4 @@
-- [中文版本](https://github.com/espressif/esp-mesh-lite/blob/master/components/mesh_lite/User_Guide_CN.md)
+- [中文版本](./User_Guide_CN.md)
 
 # ESP Wi-Fi Mesh Lite
 
@@ -7,6 +7,8 @@ This document provides an introduction to the Mesh-Lite protocol.
 ## Overview
 
 ESP-MESH-LITE is a Wi-Fi networking application of [IoT-Bridge](https://github.com/espressif/esp-iot-bridge), based on the **SoftAP + Station** mode, a set of Mesh solutions built on top of the Wi-Fi protocol. ESP-MESH-LITE allows numerous devices (henceforth referred to as nodes) spread over a large physical area (both indoors and outdoors) to be interconnected under a single WLAN (Wireless Local-Area Network). The biggest difference between ESP-MESH-LITE and [ESP-MESH](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/esp-wifi-mesh.html) (also known as ESP-WIFI-MESH) is that ESP-MESH-LITE allows sub-devices in the network to independently access the external network, and the transmission information is insensitive to the parent node, which greatly reduces the difficulty to develop the application layer. ESP-MESH-LITE is self-organizing and self-healing, which means the network can be built and maintained autonomously.
+
+**Important Note**: Version 0.2 and Version 1.0 devices cannot form a mesh network. If you have devices of different versions in your project, please ensure that they use the same protocol version.
 
 **Note**: Due to certain characteristics of the IoT-Bridge component and some limitations of ESP-IDF, the component will apply a [patch](https://github.com/espressif/esp-iot-bridge/tree/master/components/iot_bridge/patch) during compilation for the currently used ESP-IDF. To avoid impacting other projects, it is best to maintain a separate ESP-IDF for the Mesh-Lite project.
 
@@ -137,7 +139,7 @@ If more than one candidate parent node exists on the same layer, the one with th
 
 **Notes**
 
-> Users can also define which layers are fixed or disabled for the selected nodes through `esp_mesh_lite_set_allowed_level` and `esp_mesh_lite_set_disallowed_level` (see [Mesh-Lite API Reference](https://github.com/espressif/esp-mesh-lite/blob/master/components/mesh_lite/include/esp_mesh_lite_core.h)).
+> Users can also define which layers are fixed or disabled for the selected nodes through `esp_mesh_lite_set_allowed_level` and `esp_mesh_lite_set_disallowed_level` (see [Mesh-Lite API Reference](./include/esp_mesh_lite_core.h)).
 
 
 ## Establish Network
@@ -146,7 +148,7 @@ If more than one candidate parent node exists on the same layer, the one with th
 
 Warning
 
-Before ESP-MESH-LITE officially starts building the network, please ensure that all nodes in the network share the same configuration (see [`esp_mesh_lite_config_t`](https://github.com/espressif/esp-mesh-lite/blob/master/components/mesh_lite/include/esp_mesh_lite_core.h)). Each node must be configured with **the same MESH_LITE network ID, maximum number of layers, and SoftAP**.
+Before ESP-MESH-LITE officially starts building the network, please ensure that all nodes in the network share the same configuration (see [`esp_mesh_lite_config_t`](./include/esp_mesh_lite_core.h)). Each node must be configured with **the same MESH_LITE network ID, maximum number of layers, and SoftAP**.
 
 The ESP-MESH-LITE network will first select the root node and then establish downstream connections layer by layer until all nodes have joined the network. The layout of the network may depend on factors such as root node selection, parent node selection, and asynchronous power-up reset. But in short, the process of building an ESP-MESH-LITE network can be summarized in the following steps:
 
@@ -478,7 +480,7 @@ static void event_handler(void* arg, esp_event_base_t event_base,
 
 **Notes**
 
-> For specific provisioning code modification, please refer to [Wi-Fi Provisioning](https://github.com/espressif/esp-mesh-lite/blob/master/examples/rainmaker/led_light/components/app_wifi/app_wifi.c).
+> For specific provisioning code modification, please refer to [Wi-Fi Provisioning](../../examples/rainmaker/led_light/components/app_wifi/app_wifi.c).
 >
 > Except for the provisioning connection part, the rest of the network applications (Socket, MQTT, HTTP, etc.) do not need to be modified.
 
@@ -487,6 +489,6 @@ static void event_handler(void* arg, esp_event_base_t event_base,
 ## Further Notes
 
 - Data transmission is encrypted using Wi-Fi WPA2-PSK (password required for SoftAP)
-- Communication between nodes within a Mesh network can be encrypted with AES128 using `esp_mesh_lite_aes_set_key` (see [Mesh-Lite API Reference](https://github.com/espressif/esp-mesh-lite/blob/master/components/mesh_lite/include/esp_mesh_lite_core.h))
+- Communication between nodes within a Mesh network can be encrypted with AES128 using `esp_mesh_lite_aes_set_key` (see [Mesh-Lite API Reference](./include/esp_mesh_lite_core.h))
 
 The router and Internet icons used in the images in this document are from [Smashicons](https://smashicons.com/) of [www.flaticon.com](https://smashicons.com/).

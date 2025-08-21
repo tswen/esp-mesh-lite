@@ -1,10 +1,10 @@
-- [English Version](https://github.com/espressif/esp-mesh-lite/blob/master/examples/no_router/README.md)
+- [English Version](./README.md)
 
 # 无路由器示例
 
 ## 介绍
 
-本示例将介绍如何快速组建一个无路由器 ESP-Mesh-Lite 网络，其余的组网方案及详细使用方式参见 [README](https://github.com/espressif/esp-mesh-lite/blob/master/examples/mesh_local_control/README_CN.md)，在运行本示例之前请详细阅读 [User Guide](https://github.com/espressif/esp-mesh-lite/blob/master/components/mesh_lite/User_Guide_CN.md)。
+本示例将介绍如何快速组建一个无路由器 ESP-Mesh-Lite 网络，其余的组网方案及详细使用方式参见 [README](../mesh_local_control/README_CN.md)，在运行本示例之前请详细阅读 [User Guide](../../components/mesh_lite//User_Guide_CN.md)。
 
 ## 配置
 

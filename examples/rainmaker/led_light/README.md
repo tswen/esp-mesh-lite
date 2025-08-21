@@ -1,7 +1,7 @@
-- [中文版本](https://github.com/espressif/esp-mesh-lite/blob/master/examples/rainmaker/led_light/README_CN.md)
+- [中文版本](./README_CN.md)
 
-| Supported Targets | ESP32 | ESP32-C3 | ESP32-S3 | ESP32-C6 |
-| ----------------- | ----- | -------- | -------- | -------- |
+| Supported Targets | ESP32 | ESP32-C3 | ESP32-S3 | ESP32-C6 | ESP32-C5 |
+| ----------------- | ----- | -------- | -------- | -------- | -------- |
 
 # LED Light Example(Nova Home)
 
@@ -32,7 +32,7 @@ Refer to [README](https://github.com/espressif/esp-iot-bridge/blob/master/compon
 ### 4. Mesh-Lite function
 
 - You can choose whether to enable the Mesh-Lite function in the menuconfig `Component config → ESP Wi-Fi Mesh Lite`. This example enables this function by default.
-- If the Mesh-Lite function is enabled, the first networked device will connect to the target router and serve as the root node, and subsequent devices will be connected to the root node device and act as child nodes to form a Mesh-Lite network. For details, please refer to [Mesh-Lite](https://github.com/espressif/esp-mesh-lite/blob/master/components/mesh_lite/User_Guide.md).
+- If the Mesh-Lite function is enabled, the first networked device will connect to the target router and serve as the root node, and subsequent devices will be connected to the root node device and act as child nodes to form a Mesh-Lite network. For details, please refer to [Mesh-Lite](../../../components/mesh_lite/User_Guide.md).
 
 ### 5. Build & Flash
 

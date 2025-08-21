@@ -1,10 +1,10 @@
-- [中文版本](https://github.com/espressif/esp-mesh-lite/blob/master/examples/no_router/README_CN.md)
+- [中文版本](./README_CN.md)
 
 # No Router Example
 
 ## Introduction
 
-It introduces a quick way to build an ESP-Mesh-Lite network without a router. For details on other network configuration methods, please refer to [README](https://github.com/espressif/esp-mesh-lite/blob/master/examples/mesh_local_control/README.md). Before running this example, please firstly go through [User Guide](https://github.com/espressif/esp-mesh-lite/blob/master/components/mesh_lite/User_Guide.md).
+It introduces a quick way to build an ESP-Mesh-Lite network without a router. For details on other network configuration methods, please refer to [README](../mesh_local_control/README.md). Before running this example, please firstly go through [User Guide](../../components/mesh_lite/User_Guide.md).
 
 ## Configure
 

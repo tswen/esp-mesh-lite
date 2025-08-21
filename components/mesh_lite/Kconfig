@@ -255,6 +255,7 @@ menu "ESP Wi-Fi Mesh Lite"
             help
                 Use Mesh-Lite protocol version 0.2. This version is mainly used for compatibility with versions prior to release/v1.0 (d61b2a1470a478cdce89a5623dcbcf3d76397007).
                 However, this version is not compatible with version 1.0. If you're designing new products, we strongly recommend using version 1.0.
+                Note: Version 0.2 and Version 1.0 are not compatible in the same mesh network.
     endchoice
 
     config MESH_LITE_WIRELESS_DEBUG
