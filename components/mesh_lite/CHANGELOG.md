@@ -2,7 +2,7 @@
 
 # ChangeLog
 
-## v2.0.0-dev - 2025-8-20
+## v2.0.0-dev - 2025-9-1
 
 ### Breaking Change:
 
@@ -20,6 +20,12 @@
 
 #### Version 1.0 Fixes
 
+- Fixed the issue where the nodes failed to communicate with the root node, if its parent is fixed level (non root node) and the parent's station is not connected ([6a9f122](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/6a9f122aefe1375bbec74a4891debafcbec3a943))
+- Fixed the issue where fixed-level devices accidentally connected to the router ([6a9f122](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/6a9f122aefe1375bbec74a4891debafcbec3a943))
+- Fixed the issue where, after resetting the Mesh id or argot before connecting, the parent node could not recognize the device as a Mesh node when joining the parent ([6a9f122](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/6a9f122aefe1375bbec74a4891debafcbec3a943))
+- Fixed the issue where the level and parent RSSI of the root node in the Mesh topology were displayed incorrectly under the no_router scheme ([6a9f122](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/6a9f122aefe1375bbec74a4891debafcbec3a943))
+- Fixed the issue where the mesh topology returned NULL on device boot-up or when no stations were connected ([6a9f122](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/6a9f122aefe1375bbec74a4891debafcbec3a943))
+- Add the version check between mesh lite version v1.x and v0.x and prevent triggering fusion ([6a9f122](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/6a9f122aefe1375bbec74a4891debafcbec3a943))
 - Fixed the issue where dynamically setting the leaf node softap status using the esp_mesh_lite_set_leaf_node_softap_status API failed ([47bc04f](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/47bc04f5f0dd5392bb76cbe2ef895a9e67862ba2))
 - Fixed the issue where C61 devices failed to decrypt communication when AES encryption was enabled ([47bc04f](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/47bc04f5f0dd5392bb76cbe2ef895a9e67862ba2))
 - Fixed the issue where child nodes could not connect to parent nodes in special scenarios ([47bc04f](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/47bc04f5f0dd5392bb76cbe2ef895a9e67862ba2))

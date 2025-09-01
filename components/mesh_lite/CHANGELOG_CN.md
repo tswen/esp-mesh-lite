@@ -1,6 +1,6 @@
 # ChangeLog
 
-## v2.0.0-dev - 2025-8-20
+## v2.0.0-dev - 2025-9-1
 
 ### Breaking Change:
 
@@ -17,6 +17,12 @@
 
 #### Version 1.0 修复
 
+- 修复当父节点为固定层级（非根节点）且其 station 未连接时，子节点无法与根节点通信的问题 ([6a9f122](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/6a9f122aefe1375bbec74a4891debafcbec3a943))
+- 修复固定层级设备意外连接到路由器的问题 ([6a9f122](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/6a9f122aefe1375bbec74a4891debafcbec3a943))
+- 修复 Mesh 设备在连接前重新设置 Mesh id 或 argot 后，接入父节点时父节点无法识别其为 Mesh 节点的问题 ([6a9f122](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/6a9f122aefe1375bbec74a4891debafcbec3a943))
+- 修复 no_router 方案下，Mesh 拓扑中根节点的 level 和 parent rssi 显示不正确的问题 ([6a9f122](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/6a9f122aefe1375bbec74a4891debafcbec3a943))
+- 修复设备刚上电时或者没有 station 连接时获取 Mesh 拓扑为 NULL 的问题 ([6a9f122](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/6a9f122aefe1375bbec74a4891debafcbec3a943))
+- 增加了 mesh lite v1.x 与 v0.x 之间的版本检查，防止触发融合 ([6a9f122](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/6a9f122aefe1375bbec74a4891debafcbec3a943))
 - 修复使用 esp_mesh_lite_set_leaf_node_softap_status API 动态设置叶子节点 softap 状态失败的问题 ([47bc04f](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/47bc04f5f0dd5392bb76cbe2ef895a9e67862ba2))
 - 修复当设置 AES 加密通信时，C61 设备通信解密失败的问题 ([47bc04f](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/47bc04f5f0dd5392bb76cbe2ef895a9e67862ba2))
 - 修复特殊场景下，子节点无法连上父节点的问题 ([47bc04f](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/47bc04f5f0dd5392bb76cbe2ef895a9e67862ba2))
