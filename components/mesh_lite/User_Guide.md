@@ -12,6 +12,8 @@ ESP-MESH-LITE is a Wi-Fi networking application of [IoT-Bridge](https://github.c
 
 **Note**: Due to certain characteristics of the IoT-Bridge component and some limitations of ESP-IDF, the component will apply a [patch](https://github.com/espressif/esp-iot-bridge/tree/master/components/iot_bridge/patch) during compilation for the currently used ESP-IDF. To avoid impacting other projects, it is best to maintain a separate ESP-IDF for the Mesh-Lite project.
 
+**Note**: It is recommended to refer to the [`sdkconfig.defaults`](./sdkconfig.defaults) file in the `components/mesh_lite` directory, which contains the key configurations required for mesh-lite. Copying this file directly into your project directory is recommended to ensure complete configuration and normal functionality.
+
 This ESP-MESH-LITE guide contains the following sections:
 
 1. [Introduction](#introduction)
