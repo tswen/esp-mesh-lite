@@ -26,12 +26,13 @@ static void esp_mesh_lite_preorder_traversal(esp_mesh_lite_tree_structure_t* roo
         return;
     }
 
-    ESP_LOGI(TAG, "Level: %d, IP: " IPSTR ", MAC: %02X:%02X:%02X:%02X:%02X:%02X",
-             root->info.level,
-             IP2STR((ip4_addr_t*)&root->info.ip_addr),
-             root->info.mac_addr[0], root->info.mac_addr[1],
-             root->info.mac_addr[2], root->info.mac_addr[3],
-             root->info.mac_addr[4], root->info.mac_addr[5]);
+    ESP_MESH_LITE_LOGI("Level: %d, IP: " IPSTR ", MAC: %02X:%02X:%02X:%02X:%02X:%02X, Parent RSSI: %"PRId32"",
+                       root->info.level,
+                       IP2STR((ip4_addr_t*)&root->info.ip_addr),
+                       root->info.mac_addr[0], root->info.mac_addr[1],
+                       root->info.mac_addr[2], root->info.mac_addr[3],
+                       root->info.mac_addr[4], root->info.mac_addr[5],
+                       root->info.parent_rssi);
 
     esp_mesh_lite_tree_structure_t* child = root->first_child;
     while (child != NULL) {
@@ -71,6 +72,7 @@ static void print_system_info_timercb(TimerHandle_t timer)
     uint32_t family_count = esp_mesh_lite_get_family_mesh_topology(&family_tree);
     ESP_LOGI(TAG, "Family tree node number: %"PRIu32"", family_count);
     esp_mesh_lite_preorder_traversal(family_tree);
+    esp_mesh_lite_free_tree_structure(family_tree);
 }
 
 static esp_err_t esp_storage_init(void)

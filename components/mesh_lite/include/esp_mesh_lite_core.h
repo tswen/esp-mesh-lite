@@ -397,6 +397,7 @@ typedef struct esp_mesh_lite_tree_structure {
     uint16_t descendant_num;                            /**< Number of descendant nodes */
     struct esp_mesh_lite_tree_structure* first_child;   /**< Pointer to the first child in the list of children nodes */
     struct esp_mesh_lite_tree_structure* next_sibling;  /**< Pointer to the next sibling at the same level in the tree */
+    struct esp_mesh_lite_tree_structure* parent;        /**< Pointer to the parent node */
 } esp_mesh_lite_tree_structure_t;
 
 /**
@@ -987,6 +988,16 @@ uint32_t esp_mesh_lite_get_mesh_node_number(void);
  * @return The total number of nodes in the family tree
  */
 uint32_t esp_mesh_lite_get_family_mesh_topology(esp_mesh_lite_tree_structure_t** tree);
+
+/**
+ * @brief Free the memory of the Mesh-Lite family tree structure
+ *
+ * This function is used to free the memory occupied by the family tree structure
+ * obtained through esp_mesh_lite_get_family_mesh_topology.
+ *
+ * @param tree Pointer to the root node of the family tree structure to be freed
+ */
+void esp_mesh_lite_free_tree_structure(esp_mesh_lite_tree_structure_t* tree);
 
 /**
  * @brief Set the number of MAC address bytes
