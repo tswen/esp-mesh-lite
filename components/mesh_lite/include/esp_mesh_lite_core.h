@@ -378,8 +378,8 @@ typedef struct {
  * @brief Basic node information structure containing essential node details
  */
 typedef struct esp_mesh_lite_node_info {
-    uint8_t  level;                        /**< Current level/depth of the node in the mesh network hierarchy */
     uint32_t ip_addr;                      /**< IPv4 address assigned to this node */
+    uint8_t  level;                        /**< Current level/depth of the node in the mesh network hierarchy */
     uint8_t  mac_valid_tail_bytes;         /**< Number of valid bytes from the end of MAC address used for node identification */
     uint8_t  mac_addr[HWADDR_LEN];         /**< Hardware MAC address of the node's network interface */
     int32_t  parent_rssi;                  /**< RSSI value from parent node */

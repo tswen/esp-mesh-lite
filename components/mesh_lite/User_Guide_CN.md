@@ -10,7 +10,9 @@ ESP-MESH-LITE 是一套建立在 Wi-Fi 协议之上的网络协议。ESP-MESH-LI
 
 **重要提醒**：Version 0.2 和 Version 1.0 的设备无法组成一个 mesh 网络。如果您的项目中有不同版本的设备，请确保它们使用相同的协议版本。
 
-**注意**： 由于所依赖的 IoT-Bridge 组件的某些特性以及 ESP-IDF 的某些限制，组件在编译时将会给当前使用的 ESP-IDF 打上 [patch](https://github.com/espressif/esp-iot-bridge/tree/master/components/iot_bridge/patch)，为了避免对其他项目的影响，最好为 Mesh-Lite 项目单独维护 ESP-IDF。
+**注意**：由于所依赖的 IoT-Bridge 组件的某些特性以及 ESP-IDF 的某些限制，组件在编译时将会给当前使用的 ESP-IDF 打上 [patch](https://github.com/espressif/esp-iot-bridge/tree/master/components/iot_bridge/patch)，为了避免对其他项目的影响，最好为 Mesh-Lite 项目单独维护 ESP-IDF。
+
+**注意**：建议您参考 [components/mesh_lite/sdkconfig.defaults](./sdkconfig.defaults) 文件，其中包含 mesh-lite 所需的关键配置。推荐将该文件直接复制到您的工程目录中，以确保配置完整、功能正常。
 
 本 ESP-MESH-LITE 指南分为以下几个部分：
 

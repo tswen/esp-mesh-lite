@@ -12,7 +12,3 @@ CONFIG_ESP_SYSTEM_EVENT_TASK_STACK_SIZE=4096
 
 # ESP Wi-Fi Mesh Lite
 CONFIG_MESH_LITE_ENABLE=y
-CONFIG_MESH_LITE_WIRELESS_DEBUG=y
-
-# Bridge Configuration
-CONFIG_BRIDGE_SOFTAP_SSID_END_WITH_THE_MAC=y # To distinguish the softap of different Mesh devices, it is recommended to enable this option, but it is not mandatory
