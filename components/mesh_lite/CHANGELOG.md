@@ -20,6 +20,7 @@
 
 #### Version 1.0 Fixes
 
+- Fixed the issue where performing LAN OTA operations when the parent node has not enabled the LAN OTA function may cause device crashes ([6f0bf89](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/6f0bf89c5acc853c04ee51a6eaeab967354e623a))
 - Fixed the issue where, after the station connects and esp_mesh_lite_connect is called, the scan is triggered intermittently ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
 - Fixed the issue where, after LAN OTA file transfer fails (ESP_MESH_LITE_EVENT_OTA_WRITE_ERR), esp_mesh_lite_transmit_file_start is triggered continuously ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
 - Fixed the issue where, during LAN OTA file transfer, the station may experience abnormal checkpoint resumption after disconnection and reconnection ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
