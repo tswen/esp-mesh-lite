@@ -1,6 +1,6 @@
 # ChangeLog
 
-## v2.0.0-dev - 2025-9-1
+## v2.0.0-dev - 2025-9-8
 
 ### Breaking Change:
 
@@ -17,6 +17,10 @@
 
 #### Version 1.0 修复
 
+- 修复设备 station 连接时调用 esp_mesh_lite_connect 后偶现不断触发扫描的问题 ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
+- 修复 LAN OTA 文件传输失败后（ESP_MESH_LITE_EVENT_OTA_WRITE_ERR）不断触发 esp_mesh_lite_transmit_file_start 的问题 ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
+- 修复 LAN OTA 文件传输时，偶现 station 断开重连后断点续传异常的问题 ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
+- 修复 C61 软件重启后未直接连接源父节点的问题 ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
 - 修复当父节点为固定层级（非根节点）且其 station 未连接时，子节点无法与根节点通信的问题 ([6a9f122](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/6a9f122aefe1375bbec74a4891debafcbec3a943))
 - 修复固定层级设备意外连接到路由器的问题 ([6a9f122](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/6a9f122aefe1375bbec74a4891debafcbec3a943))
 - 修复 Mesh 设备在连接前重新设置 Mesh id 或 argot 后，接入父节点时父节点无法识别其为 Mesh 节点的问题 ([6a9f122](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/6a9f122aefe1375bbec74a4891debafcbec3a943))
@@ -39,6 +43,7 @@
 
 #### Version 1.0 优化
 
+- 优化获取 Mesh 网络拓扑的功能 ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
 - 优化：执行 esp_mesh_lite_connect 时，如果未扫描到路由器以及合适父节点，post disconnect（reason：no_ap_found）事件 ([47bc04f](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/47bc04f5f0dd5392bb76cbe2ef895a9e67862ba2))
 
 ## v1.0.2 - 2025-7-4
