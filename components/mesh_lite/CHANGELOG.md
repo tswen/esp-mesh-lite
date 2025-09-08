@@ -2,7 +2,7 @@
 
 # ChangeLog
 
-## v2.0.0-dev - 2025-9-1
+## v2.0.0-dev - 2025-9-8
 
 ### Breaking Change:
 
@@ -20,6 +20,10 @@
 
 #### Version 1.0 Fixes
 
+- Fixed the issue where, after the station connects and esp_mesh_lite_connect is called, the scan is triggered intermittently ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
+- Fixed the issue where, after LAN OTA file transfer fails (ESP_MESH_LITE_EVENT_OTA_WRITE_ERR), esp_mesh_lite_transmit_file_start is triggered continuously ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
+- Fixed the issue where, during LAN OTA file transfer, the station may experience abnormal checkpoint resumption after disconnection and reconnection ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
+- Fixed the issue where C61 software restarts and does not directly connect to the source parent node ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
 - Fixed the issue where the nodes failed to communicate with the root node, if its parent is fixed level (non root node) and the parent's station is not connected ([6a9f122](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/6a9f122aefe1375bbec74a4891debafcbec3a943))
 - Fixed the issue where fixed-level devices accidentally connected to the router ([6a9f122](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/6a9f122aefe1375bbec74a4891debafcbec3a943))
 - Fixed the issue where, after resetting the Mesh id or argot before connecting, the parent node could not recognize the device as a Mesh node when joining the parent ([6a9f122](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/6a9f122aefe1375bbec74a4891debafcbec3a943))
@@ -42,6 +46,7 @@
 
 #### Version 1.0 Optimization
 
+- Optimized the function of obtaining Mesh network topology ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
 - Optimization: When executing esp_mesh_lite_connect, if no router or suitable parent node is found during scanning, post a disconnect event (reason: no_ap_found) ([47bc04f](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/47bc04f5f0dd5392bb76cbe2ef895a9e67862ba2))
 
 ## v1.0.2 - 2025-7-4
