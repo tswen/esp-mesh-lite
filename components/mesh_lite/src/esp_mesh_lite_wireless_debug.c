@@ -577,8 +577,6 @@ static esp_err_t wireless_log_process_cb(const esp_now_recv_info_t *recv_info, c
     wireless_debug_log_t *wireless_debug_log = (wireless_debug_log_t *)data;
     size_t actual_data_len = len - sizeof(wireless_debug_log_t);
 
-    wireless_debug_log->data[actual_data_len] = '\0';
-
     if (wireless_debug_log->crc32 != esp_rom_crc32_le(CRC_INIT_VALUE, (uint8_t*)wireless_debug_log->data, actual_data_len)) {
         return ESP_FAIL;
     }
