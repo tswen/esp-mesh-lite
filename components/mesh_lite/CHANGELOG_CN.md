@@ -1,6 +1,6 @@
 # ChangeLog
 
-## v2.0.0-dev - 2025-9-8
+## v2.0.0-dev - 2025-9-9
 
 ### Breaking Change:
 
@@ -17,6 +17,8 @@
 
 #### Version 1.0 修复
 
+- 修复连续通过 esp_mesh_lite_transmit_file_start 传输不同文件时可能存在失败的问题 ([c2ab3f7](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/c2ab3f710fa37130b68063916729c76f3526af6f))
+- 使用 Mesh_Lite 宏定义代替 pdMS_TO_TICKS ([c2ab3f7](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/c2ab3f710fa37130b68063916729c76f3526af6f))
 - 修复在父节点未使能 LAN OTA 功能时，进行 LAN OTA 操作可能导致设备崩溃的问题 ([6f0bf89](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/6f0bf89c5acc853c04ee51a6eaeab967354e623a))
 - 修复设备 station 连接时调用 esp_mesh_lite_connect 后偶现不断触发扫描的问题 ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
 - 修复 LAN OTA 文件传输失败后（ESP_MESH_LITE_EVENT_OTA_WRITE_ERR）不断触发 esp_mesh_lite_transmit_file_start 的问题 ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))

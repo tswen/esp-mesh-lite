@@ -2,7 +2,7 @@
 
 # ChangeLog
 
-## v2.0.0-dev - 2025-9-8
+## v2.0.0-dev - 2025-9-9
 
 ### Breaking Change:
 
@@ -20,6 +20,8 @@
 
 #### Version 1.0 Fixes
 
+- Fixed the issue where consecutive transfers of different files via esp_mesh_lite_transmit_file_start may fail ([c2ab3f7](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/c2ab3f710fa37130b68063916729c76f3526af6f))
+- Replaced pdMS_TO_TICKS with Mesh_Lite macro definition ([c2ab3f7](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/c2ab3f710fa37130b68063916729c76f3526af6f))
 - Fixed the issue where performing LAN OTA operations when the parent node has not enabled the LAN OTA function may cause device crashes ([6f0bf89](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/6f0bf89c5acc853c04ee51a6eaeab967354e623a))
 - Fixed the issue where, after the station connects and esp_mesh_lite_connect is called, the scan is triggered intermittently ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
 - Fixed the issue where, after LAN OTA file transfer fails (ESP_MESH_LITE_EVENT_OTA_WRITE_ERR), esp_mesh_lite_transmit_file_start is triggered continuously ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
