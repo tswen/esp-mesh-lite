@@ -17,6 +17,7 @@
 
 #### Version 1.0 修复
 
+- 修复在父节点未使能 LAN OTA 功能时，进行 LAN OTA 操作可能导致设备崩溃的问题 ([6f0bf89](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/6f0bf89c5acc853c04ee51a6eaeab967354e623a))
 - 修复设备 station 连接时调用 esp_mesh_lite_connect 后偶现不断触发扫描的问题 ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
 - 修复 LAN OTA 文件传输失败后（ESP_MESH_LITE_EVENT_OTA_WRITE_ERR）不断触发 esp_mesh_lite_transmit_file_start 的问题 ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
 - 修复 LAN OTA 文件传输时，偶现 station 断开重连后断点续传异常的问题 ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
