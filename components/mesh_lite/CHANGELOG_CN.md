@@ -1,21 +1,29 @@
 # ChangeLog
 
-## v2.0.0-dev - 2025-9-9
+## v2.0.0 - 2025-9-10
 
 ### Breaking Change:
 
-- 新增 Mesh Lite Proto 1.0 版本，用于拓展更多功能以及修复一些特定 bug ([a815056](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/a81505653b50549a4b48abf2f0e3435603d550b1))
+- v2.0.0 版本与v1.0.2 以及之前的版本存在兼容性问题，无法和老的版本组成一个 mesh 网络，如果 v2.0.0 和老的版本混合使用，将会形成两个 mesh 网络。对于老的版本固件，建议通过 OTA 的方式，升级到新版本。
 
 ### 功能:
 
-#### Version 1.0 功能
+#### 支持的 ESP-IDF 版本
+
+- 新增支持 ESP-IDF v5.5 版本，不再支持已停止维护的 ESP-IDF v5.0 版本 ([883438e](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/883438e26330dc111c6e0c00ba5db62943db48d7))
+
+#### Mesh
 
 - 新增在获取 Mesh 网络拓扑信息时，包含每个设备父节点的 RSSI 信息 ([c913d81](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/c913d812b4d0df980a30b7368c3f481fdf9ce6c1))
 - 新增支持获取整个 Mesh 网络拓扑的功能 ([9befdce](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/9befdce64cd6d266649ab89e6b8486eca81d6d13))
-- 新增支持 ESP-IDF v5.5 版本，不再支持已停止维护的 ESP-IDF v5.0 版本 ([883438e](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/883438e26330dc111c6e0c00ba5db62943db48d7))
 - 支持组网区分 SSID 相同，但 PASSWORD 不同的路由器 ([a815056](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/a81505653b50549a4b48abf2f0e3435603d550b1))
 
-#### Version 1.0 修复
+#### 优化
+
+- 优化获取 Mesh 网络拓扑的功能 ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
+- 优化：执行 esp_mesh_lite_connect 时，如果未扫描到路由器以及合适父节点，post disconnect（reason：no_ap_found）事件 ([47bc04f](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/47bc04f5f0dd5392bb76cbe2ef895a9e67862ba2))
+
+### Bugfix
 
 - 修复连续通过 esp_mesh_lite_transmit_file_start 传输不同文件时可能存在失败的问题 ([c2ab3f7](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/c2ab3f710fa37130b68063916729c76f3526af6f))
 - 使用 Mesh_Lite 宏定义代替 pdMS_TO_TICKS ([c2ab3f7](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/c2ab3f710fa37130b68063916729c76f3526af6f))
@@ -43,11 +51,6 @@
 - 修复当 esp_mesh_lite_set_router_min_rssi_threshold 设置的阈值高于 esp_mesh_lite_set_networking_mode 设置的 route mode 阈值时，RSSI 处于这两个阈值之间的设备无法连接路由器的问题 ([3622003](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/36220033ebe0996e6da0cd77b558deb3ee1d3ddb))
 - 修复 esp_mesh_lite_set_router_min_rssi_threshold 设置的阈值在某些极端条件下不生效的问题 ([3622003](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/36220033ebe0996e6da0cd77b558deb3ee1d3ddb))
 - LAN OTA 文件传输时，当请求固件一方与提供固件一方的 OTA_DATA_LEN 配置不同，导致传输失败的问题 ([a815056](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/a81505653b50549a4b48abf2f0e3435603d550b1))
-
-#### Version 1.0 优化
-
-- 优化获取 Mesh 网络拓扑的功能 ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
-- 优化：执行 esp_mesh_lite_connect 时，如果未扫描到路由器以及合适父节点，post disconnect（reason：no_ap_found）事件 ([47bc04f](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/47bc04f5f0dd5392bb76cbe2ef895a9e67862ba2))
 
 ## v1.0.2 - 2025-7-4
 
