@@ -1,24 +1,31 @@
-- [中文版本](https://github.com/espressif/esp-mesh-lite/blob/master/components/mesh_lite/CHANGELOG_CN.md)
+- [中文版本](./CHANGELOG_CN.md)
 
 # ChangeLog
 
-## v2.0.0-dev - 2025-9-9
+## v2.0.0 - 2025-9-10
 
 ### Breaking Change:
 
-- Added Mesh Lite Proto version 1.0 to expand more features and fix some specific bugs ([a815056](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/a81505653b50549a4b48abf2f0e3435603d550b1))
-
+- Version v2.0.0 has compatibility issues with v1.0.2 and earlier versions, and cannot form a mesh network with older versions. If v2.0.0 and older versions are used together, two separate mesh networks will be formed. For devices running older firmware versions, it is recommended to upgrade to the new version through OTA (Over-The-Air) updates.
 
 ### Enhancements:
 
-#### Version 1.0 Features
+#### Supported ESP-IDF versions
+
+- Added support for ESP-IDF v5.5, and removed support for ESP-IDF v5.0 that is no longer maintained ([883438e](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/883438e26330dc111c6e0c00ba5db62943db48d7))
+
+#### Mesh
 
 - Added RSSI information for each device's parent node when obtaining Mesh network topology information ([c913d81](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/c913d812b4d0df980a30b7368c3f481fdf9ce6c1))
 - Add support for obtaining the entire Mesh network topology ([9befdce](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/9befdce64cd6d266649ab89e6b8486eca81d6d13))
-- Add support for ESP-IDF v5.5, and remove support for ESP-IDF v5.0 that is no longer maintained ([883438e](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/883438e26330dc111c6e0c00ba5db62943db48d7))
 - Support distinguishing routers with the same SSID but different passwords during networking ([a815056](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/a81505653b50549a4b48abf2f0e3435603d550b1))
 
-#### Version 1.0 Fixes
+#### Optimization
+
+- Optimized the function of obtaining Mesh network topology ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
+- Optimization: When executing esp_mesh_lite_connect, if no router or suitable parent node is found during scanning, post a disconnect event (reason: no_ap_found) ([47bc04f](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/47bc04f5f0dd5392bb76cbe2ef895a9e67862ba2))
+
+#### Bugfix
 
 - Fixed the issue where consecutive transfers of different files via esp_mesh_lite_transmit_file_start may fail ([c2ab3f7](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/c2ab3f710fa37130b68063916729c76f3526af6f))
 - Replaced pdMS_TO_TICKS with Mesh_Lite macro definition ([c2ab3f7](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/c2ab3f710fa37130b68063916729c76f3526af6f))
@@ -46,11 +53,6 @@
 - Fixed the issue where devices with RSSI values between the threshold set by esp_mesh_lite_set_router_min_rssi_threshold and the route mode threshold set by esp_mesh_lite_set_networking_mode cannot connect to the router when the former threshold is higher ([3622003](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/36220033ebe0996e6da0cd77b558deb3ee1d3ddb))
 - Fixed the issue where the threshold set by esp_mesh_lite_set_router_min_rssi_threshold does not take effect under certain extreme conditions ([3622003](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/36220033ebe0996e6da0cd77b558deb3ee1d3ddb))
 - Fixed the issue where LAN OTA file transfer fails when the OTA_DATA_LEN configuration differs between the firmware requester and provider ([a815056](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/a81505653b50549a4b48abf2f0e3435603d550b1))
-
-#### Version 1.0 Optimization
-
-- Optimized the function of obtaining Mesh network topology ([31359ca](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/31359ca250c0b492713a82a605dc1cc80572c046))
-- Optimization: When executing esp_mesh_lite_connect, if no router or suitable parent node is found during scanning, post a disconnect event (reason: no_ap_found) ([47bc04f](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/47bc04f5f0dd5392bb76cbe2ef895a9e67862ba2))
 
 ## v1.0.2 - 2025-7-4
 
