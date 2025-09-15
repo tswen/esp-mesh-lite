@@ -26,9 +26,22 @@ else()
     message(STATUS "Apply ESP-IDF Patch: lwip_kconfig_below_v5.5.patch")
 endif()
 
+set(package_version "")
+set(yml_file "${CMAKE_CURRENT_LIST_DIR}/idf_component.yml")
+if(EXISTS ${yml_file})
+    file(READ ${yml_file} ver)
+    string(REGEX MATCH "version:[ ]*\"([^\"]+)\"" _ ${ver})
+    set(package_version ${CMAKE_MATCH_1})
+    message(STATUS "Found package version: ${package_version}")
+else()
+    message(WARNING " ${yml_file} not exist")
+endif()
+
 idf_component_register(SRCS "${srcs}"
                        INCLUDE_DIRS include
                        REQUIRES ${require_components})
+
+target_compile_definitions(${COMPONENT_LIB} PRIVATE PACKAGE_VERSION=\"${package_version}\")
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/include/esp_mesh_lite_lwip_hook.h ${CMAKE_BINARY_DIR}/config/)
 get_property(hook_file GLOBAL PROPERTY CUSTOMER_LWIP_HOOK_FILE_LISTS)
