@@ -8,9 +8,16 @@
 
 ESP-MESH-LITE 是一套建立在 Wi-Fi 协议之上的网络协议。ESP-MESH-LITE 允许分布在大范围区域内（室内和室外）的大量设备（下文称节点）在同一个 WLAN（无线局域网）中相互连接。ESP-MESH-LITE 与 [ESP-MESH](https://docs.espressif.com/projects/esp-idf/zh_CN/latest/esp32/api-guides/esp-wifi-mesh.html)（又称 ESP-WIFI-MESH）最大的不同是 ESP-MESH-LITE 允许组网内的子设备独立访问外部网络，传输信息对于父节点无感，大大降低了应用层开发难度，ESP-MESH-LITE 具有自组网和自修复的特性，也就是说 Mesh 网络可以自主地构建和维护。
 
-**重要提醒**：Version 0.2 和 Version 1.0 的设备无法组成一个 mesh 网络。如果您的项目中有不同版本的设备，请确保它们使用相同的协议版本。
+**重要提示**：
 
-**注意**：由于所依赖的 IoT-Bridge 组件的某些特性以及 ESP-IDF 的某些限制，组件在编译时将会给当前使用的 ESP-IDF 打上 [patch](https://github.com/espressif/esp-iot-bridge/tree/master/components/iot_bridge/patch)，为了避免对其他项目的影响，最好为 Mesh-Lite 项目单独维护 ESP-IDF。
+1. **版本兼容性**：Version 0.2（分支 release/v1.0 及之前）与 Version 1.0（分支 release/v2.0 及之后）的设备无法组成同一个 mesh 网络。请确保同一网络中的所有设备使用相同的固件版本。
+
+2. **ESP-IDF 管理要求**：由于 Mesh-Lite 基于 IoT-Bridge 组件构建，而 Mesh-Lite 和 IoT-Bridge 项目都需要为 ESP-IDF 应用一些必要的 patch 来实现特定功能，因此：
+   - **推荐使用 git 维护的 ESP-IDF**：编译 Mesh-Lite 和 IoT-Bridge 项目时，推荐使用通过 git 管理的 ESP-IDF 版本，这样 patch 会自动应用。
+   - **压缩包版本的处理方式**：如果必须使用压缩包下载的 ESP-IDF 版本，需要手动为 ESP-IDF 应用 patch，patch 路径：
+     - 本地路径：`./patches`
+     - 在线路径：[https://github.com/espressif/esp-iot-bridge/tree/master/components/iot_bridge/patch](https://github.com/espressif/esp-iot-bridge/tree/master/components/iot_bridge/patch)
+   - **建议单独管理 ESP-IDF**：为了避免 patch 对其他项目造成影响，强烈建议为 Mesh-Lite 和 IoT-Bridge 项目单独维护一个 ESP-IDF 实例，与其他项目使用的 ESP-IDF 区分开。
 
 **注意**：建议您参考 [components/mesh_lite/sdkconfig.defaults](./sdkconfig.defaults) 文件，其中包含 mesh-lite 所需的关键配置。推荐将该文件直接复制到您的工程目录中，以确保配置完整、功能正常。
 
