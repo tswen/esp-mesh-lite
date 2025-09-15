@@ -75,7 +75,7 @@ static void esp_mesh_lite_event_ip_changed_handler(void *arg, esp_event_base_t e
 
 void esp_mesh_lite_init(esp_mesh_lite_config_t* config)
 {
-    ESP_LOGI(TAG, "esp-mesh-lite component version: %d.%d.%d", MESH_LITE_VER_MAJOR, MESH_LITE_VER_MINOR, MESH_LITE_VER_PATCH);
+    ESP_LOGI(TAG, "esp-mesh-lite component version: %s", PACKAGE_VERSION);
 
     esp_bridge_network_segment_check_register(esp_mesh_lite_network_segment_is_used);
     esp_event_handler_instance_register(ESP_MESH_LITE_EVENT, ESP_EVENT_ANY_ID, &esp_mesh_lite_event_ip_changed_handler, NULL, NULL);
