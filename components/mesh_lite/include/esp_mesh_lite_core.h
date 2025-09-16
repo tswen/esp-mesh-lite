@@ -565,6 +565,19 @@ esp_err_t esp_mesh_lite_set_argot(uint32_t argot);
 esp_err_t esp_mesh_lite_set_rssi_threshold(esp_mesh_lite_rssi_threshold_list_t rssi_threshold_list[], size_t size, int8_t min_rssi);
 
 /**
+ * @brief Get the minimum RSSI threshold for parent selection in Mesh mode.
+ *
+ * This function returns the minimum RSSI (Received Signal Strength Indication) threshold
+ * used when selecting a parent node in Mesh mode. Only parent nodes with a signal strength
+ * above this threshold (in dBm) will be considered for connection. If the RSSI of a potential
+ * parent node is below this value, the device will not connect to that node in Mesh mode.
+ *
+ * @return
+ *      The minimum RSSI threshold value (in dBm) for parent selection in Mesh mode.
+ */
+int8_t esp_mesh_lite_get_mesh_mode_min_rssi_threshold(void);
+
+/**
  * @brief  Set SoftAP information.
  *
  * @param[in]  softap_ssid
@@ -621,6 +634,18 @@ esp_err_t esp_mesh_lite_set_networking_mode(esp_mesh_lite_networking_mode_t mode
 void esp_mesh_lite_set_router_min_rssi_threshold(int8_t rssi_min);
 
 /**
+ * @brief Get the minimum RSSI threshold for connecting to a router.
+ *
+ * This function returns the minimum Received Signal Strength Indication (RSSI) threshold
+ * that is currently set for connecting to a router. Only routers with a signal strength
+ * greater than or equal to this threshold will be considered for connection.
+ *
+ * @return
+ *      The minimum RSSI threshold (in dBm) for connecting to a router.
+ */
+int8_t esp_mesh_lite_get_connect_router_min_rssi_threshold(void);
+
+/**
  * @brief Set the maximum number of child nodes that can connect to this node
  *
  * This function sets the maximum number of child nodes that can connect to the current node.
@@ -669,6 +694,26 @@ void esp_mesh_lite_set_leaf_node_softap_status(esp_mesh_lite_leaf_node_softap_st
  *      - ESP_FAIL: Failed to set the fusion config
  */
 esp_err_t esp_mesh_lite_set_fusion_config(esp_mesh_lite_fusion_config_t *config);
+
+/**
+ * @brief Get the mesh lite fusion configuration.
+ *
+ * This API retrieves the current fusion timing parameters for the mesh lite network.
+ *
+ * Usage Example:
+ * @code{.c}
+ * esp_mesh_lite_fusion_config_t fusion_config;
+ * if (esp_mesh_lite_get_fusion_config(&fusion_config) == ESP_OK) {
+ *     // Use fusion_config.fusion_start_time_sec and fusion_config.fusion_frequency_sec
+ * }
+ * @endcode
+ *
+ * @param[out] config A pointer to the `esp_mesh_lite_fusion_config_t` struct to store the current fusion configuration.
+ * @return
+ *      - ESP_OK: Success
+ *      - ESP_FAIL: Failed to get the fusion config
+ */
+esp_err_t esp_mesh_lite_get_fusion_config(esp_mesh_lite_fusion_config_t *config);
 
 /**
  * @brief Configure WiFi reconnection behavior after station disconnection
@@ -740,6 +785,15 @@ uint8_t esp_mesh_lite_get_allowed_level(void);
  *      - disallowed_level
  */
 uint8_t esp_mesh_lite_get_disallowed_level(void);
+
+/**
+ * @brief Get the maximum level allowed for the ESP-Mesh-Lite network.
+ *
+ * This function is used to get the maximum level allowed for nodes in the ESP-Mesh-Lite network.
+ *
+ * @return The maximum level of the network, ranging from 1 to 15.
+ */
+uint8_t esp_mesh_lite_get_max_level(void);
 
 /**
  * @brief Get the current networking mode of ESP-Mesh-Lite.
