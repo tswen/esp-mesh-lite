@@ -8,9 +8,16 @@ This document provides an introduction to the Mesh-Lite protocol.
 
 ESP-MESH-LITE is a Wi-Fi networking application of [IoT-Bridge](https://github.com/espressif/esp-iot-bridge), based on the **SoftAP + Station** mode, a set of Mesh solutions built on top of the Wi-Fi protocol. ESP-MESH-LITE allows numerous devices (henceforth referred to as nodes) spread over a large physical area (both indoors and outdoors) to be interconnected under a single WLAN (Wireless Local-Area Network). The biggest difference between ESP-MESH-LITE and [ESP-MESH](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/esp-wifi-mesh.html) (also known as ESP-WIFI-MESH) is that ESP-MESH-LITE allows sub-devices in the network to independently access the external network, and the transmission information is insensitive to the parent node, which greatly reduces the difficulty to develop the application layer. ESP-MESH-LITE is self-organizing and self-healing, which means the network can be built and maintained autonomously.
 
-**Important Note**: Version 0.2 and Version 1.0 devices cannot form a mesh network. If you have devices of different versions in your project, please ensure that they use the same protocol version.
+**Important Notes**:
 
-**Note**: Due to certain characteristics of the IoT-Bridge component and some limitations of ESP-IDF, the component will apply a [patch](https://github.com/espressif/esp-iot-bridge/tree/master/components/iot_bridge/patch) during compilation for the currently used ESP-IDF. To avoid impacting other projects, it is best to maintain a separate ESP-IDF for the Mesh-Lite project.
+1. **Version Compatibility**: Version 0.2(branch release/v1.0 and before) and Version 1.0(branch release/v2.0 and later) devices cannot form a mesh network. Please ensure that your devices in one network use the same firmware.
+
+2. **ESP-IDF Management Requirements**: Since Mesh-Lite is built based on the IoT-Bridge component, both Mesh-Lite and IoT-Bridge projects require applying certain necessary patches to ESP-IDF to implement specific features, therefore:
+   - **Recommended: Use git-managed ESP-IDF**: When compiling Mesh-Lite and IoT-Bridge projects, it is recommended to use ESP-IDF versions managed through git, as patches will be applied automatically.
+   - **Compressed Package Version Handling**: If you must use a compressed package version of ESP-IDF, you need to manually apply patches to ESP-IDF. Patch locations:
+     - Local path: `./patches`
+     - Online path: [https://github.com/espressif/esp-iot-bridge/tree/master/components/iot_bridge/patch](https://github.com/espressif/esp-iot-bridge/tree/master/components/iot_bridge/patch)
+   - **Recommended: Separate ESP-IDF Management**: To avoid patches affecting other projects, it is strongly recommended to maintain a separate ESP-IDF instance for Mesh-Lite and IoT-Bridge projects, distinct from ESP-IDF used by other projects.
 
 **Note**: It is recommended to refer to the [`sdkconfig.defaults`](./sdkconfig.defaults) file in the `components/mesh_lite` directory, which contains the key configurations required for mesh-lite. Copying this file directly into your project directory is recommended to ensure complete configuration and normal functionality.
 
