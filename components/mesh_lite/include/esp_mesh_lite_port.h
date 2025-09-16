@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023-2024 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2023-2025 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -78,6 +78,17 @@ esp_err_t esp_mesh_lite_get_ap_record(mesh_lite_ap_record_t *ap_record);
  * @return ESP_OK on success, or an appropriate error code on failure.
  */
 esp_err_t esp_mesh_lite_set_wifi_config(mesh_lite_sta_config_t *cfg);
+
+/**
+ * @brief Set Wi-Fi access point configuration.
+ *
+ * This function sets the configuration for the Wi-Fi access point, including SSID,
+ * password, channel, and other parameters.
+ *
+ * @param cfg Pointer to the Wi-Fi access point configuration structure (mesh_lite_ap_config_t).
+ * @return ESP_OK on success, or an appropriate error code on failure.
+ */
+esp_err_t esp_mesh_lite_set_ap_config(mesh_lite_ap_config_t *cfg);
 
 /**
  * @brief Get Wi-Fi station configuration.

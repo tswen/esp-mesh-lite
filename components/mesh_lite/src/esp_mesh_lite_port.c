@@ -66,6 +66,7 @@ esp_err_t esp_mesh_lite_set_wifi_config(mesh_lite_sta_config_t *cfg)
 
     wifi_cfg.sta.threshold.rssi = cfg->threshold.rssi;
     wifi_cfg.sta.threshold.authmode = cfg->threshold.authmode;
+    wifi_cfg.sta.failure_retry_cnt = cfg->failure_retry_cnt;
 
     if (esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg) != ESP_OK) {
         return ESP_FAIL;
@@ -96,7 +97,33 @@ esp_err_t esp_mesh_lite_get_wifi_config(mesh_lite_sta_config_t *cfg)
 
     cfg->threshold.rssi = wifi_cfg.sta.threshold.rssi;
     cfg->threshold.authmode = wifi_cfg.sta.threshold.authmode;
+    cfg->failure_retry_cnt = wifi_cfg.sta.failure_retry_cnt;
 
+    return ESP_OK;
+}
+
+esp_err_t esp_mesh_lite_set_ap_config(mesh_lite_ap_config_t *cfg)
+{
+    if (!cfg) {
+        return ESP_FAIL;
+    }
+
+    wifi_config_t wifi_cfg;
+    memset(&wifi_cfg, 0x0, sizeof(wifi_config_t));
+
+    memcpy((char *)wifi_cfg.ap.ssid, (char *)cfg->ssid, sizeof(wifi_cfg.ap.ssid));
+    strlcpy((char *)wifi_cfg.ap.password, (char *)cfg->password, sizeof(wifi_cfg.ap.password));
+
+    wifi_cfg.ap.ssid_len = cfg->ssid_len;
+    wifi_cfg.ap.channel = cfg->channel;
+    wifi_cfg.ap.authmode = cfg->authmode;
+    wifi_cfg.ap.ssid_hidden = cfg->ssid_hidden;
+    wifi_cfg.ap.max_connection = cfg->max_connection;
+    wifi_cfg.ap.beacon_interval = cfg->beacon_interval;
+
+    if (esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg) != ESP_OK) {
+        return ESP_FAIL;
+    }
     return ESP_OK;
 }
 
@@ -113,6 +140,13 @@ esp_err_t esp_mesh_lite_get_ap_config(mesh_lite_ap_config_t *cfg)
 
     memcpy((char *)cfg->ssid, (char *)wifi_cfg.ap.ssid, sizeof(cfg->ssid));
     strlcpy((char *)cfg->password, (char *)wifi_cfg.ap.password, sizeof(cfg->password));
+
+    cfg->ssid_len = wifi_cfg.ap.ssid_len;
+    cfg->channel = wifi_cfg.ap.channel;
+    cfg->authmode = wifi_cfg.ap.authmode;
+    cfg->ssid_hidden = wifi_cfg.ap.ssid_hidden;
+    cfg->max_connection = wifi_cfg.ap.max_connection;
+    cfg->beacon_interval = wifi_cfg.ap.beacon_interval;
 
     return ESP_OK;
 }
