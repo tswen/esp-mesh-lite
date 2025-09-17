@@ -154,7 +154,7 @@ typedef esp_err_t (*lan_ota_get_file_cb_t)(esp_mesh_lite_lan_ota_file_transfer_p
  *
  * @return esp_err_t The result of the operation.
  */
-typedef esp_err_t (*lan_ota_get_file_done_cb_t)(void);
+typedef esp_err_t (*lan_ota_get_file_done_cb_t)(esp_mesh_lite_lan_ota_file_transfer_param_t *param);
 
 /**
  * @brief Callback function pointer type for handling external URL OTA.
@@ -1149,9 +1149,9 @@ esp_err_t esp_mesh_lite_lan_ota_set_file_name(char *file_name);
  *     return esp_ota_write(update_handle, (const void *)param->data, param->data_size);
  * }
  *
- * static esp_err_t get_file_done(void)
+ * static esp_err_t get_file_done(esp_mesh_lite_lan_ota_file_transfer_param_t *param)
  * {
- *     printf("Get File Done\n");
+ *     printf("Get File(%s) Done\n", param->fw_version);
  *     esp_ota_end(update_handle);
  *     return esp_ota_set_boot_partition(next_app_partition);
  * }

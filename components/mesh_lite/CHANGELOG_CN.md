@@ -1,5 +1,15 @@
 # ChangeLog
 
+## v2.1.0-dev - 2025-9-16
+
+### Breaking Change:
+
+- 为 get_file_done cb 增加更多参数 ([25473c8](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/25473c8c67554704b9f11d0f814a8618c5f17eb3))
+
+### Bugfix
+
+- 修复当不同节点 max_level 设置不一致时，已经达到最高层级的设备仍有可能被作为父节点进行连接的问题 ([25473c8](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/25473c8c67554704b9f11d0f814a8618c5f17eb3))
+
 ## v2.0.0 - 2025-9-10
 
 ### Breaking Change:
