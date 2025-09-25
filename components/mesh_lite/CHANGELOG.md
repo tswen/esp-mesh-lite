@@ -2,11 +2,17 @@
 
 # ChangeLog
 
-## v2.1.0-dev - 2025-9-16
+## v2.1.0-dev - 2025-10-11
 
 ### Breaking Change:
 
 - Added more parameters to the get_file_done callback ([25473c8](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/25473c8c67554704b9f11d0f814a8618c5f17eb3))
+
+### Enhancements:
+
+#### Mesh
+
+- Added espnow channel switching transmission feature ([19fccc4](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/19fccc424abf6f52a22bef6da08ed7b1080987d8))
 
 ### Bugfix
 
