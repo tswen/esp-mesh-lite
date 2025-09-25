@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "esp_now.h"
+#include "esp_idf_version.h"
 
 #define ESPNOW_MAXDELAY                  (512)
 #if defined(ESP_NOW_MAX_DATA_LEN_V2)
@@ -109,6 +110,29 @@ esp_err_t esp_mesh_lite_espnow_send(uint8_t type, uint8_t *peer_addr, const uint
  *      - ESP_FAIL: Failed to send data or delete the peer
  */
 esp_err_t esp_mesh_lite_espnow_send_and_del_peer(uint8_t type, uint8_t *peer_addr, const uint8_t *data, size_t len);
+
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 5, 0)
+/**
+ * @brief Send data using ESP-Mesh-Lite ESP-NOW from a specified channel.
+ *
+ * This function sends data of the specified type using the ESP-Mesh-Lite ESP-NOW protocol
+ * with the configuration specified in the esp_now_switch_channel_t structure.
+ *
+ * Note: This functionality is only supported in the latest master branch of ESP-IDF.
+ *
+ * @param[in] type Type of the data being sent.
+ * @param[in] config Pointer to the ESP-NOW switch channel configuration structure.
+ *                   The structure should contain channel, destination MAC, data, and other parameters.
+ * @param[in] del_peer Whether to delete the peer after sending.
+ * @return
+ *      - ESP_OK: Data sent successfully
+ *      - ESP_ERR_INVALID_STATE: ESP-NOW not initialized
+ *      - ESP_ERR_INVALID_ARG: Invalid arguments (config is NULL or data is NULL)
+ *      - ESP_ERR_NO_MEM: Out of memory
+ *      - Other error codes from esp_now_switch_channel_tx()
+ */
+esp_err_t esp_mesh_lite_espnow_switch_channel_send(uint8_t type, esp_now_switch_channel_t *config, bool del_peer);
+#endif
 
 /**
  * @brief Register a callback function for handling ESP-Mesh-Lite ESP-NOW data reception.

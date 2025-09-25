@@ -9,7 +9,10 @@
 #include "freertos/FreeRTOS.h"
 #include "esp_log.h"
 #include "esp_mac.h"
+#include "esp_now.h"
 #include "esp_mesh_lite.h"
+
+static const char *TAG = "esp_mesh_lite_espnow";
 
 static uint8_t espnow_data[ESPNOW_PAYLOAD_MAX_LEN];
 static esp_mesh_lite_espnow_handler_failed_hook_t espnow_recv_failed_hook = NULL;
@@ -126,6 +129,52 @@ esp_err_t esp_mesh_lite_espnow_send_and_del_peer(uint8_t type, uint8_t *peer_add
 
     return ret;
 }
+
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 5, 0)
+esp_err_t esp_mesh_lite_espnow_switch_channel_send(uint8_t type, esp_now_switch_channel_t *config, bool del_peer)
+{
+    if (espnow_init == false) {
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    if (!config) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    // Check data length, reserve one byte for type
+    if (config->data_len >= ESPNOW_PAYLOAD_MAX_LEN) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    // Prepare data to send, first byte is type
+    size_t espnow_data_len = config->data_len + 1;
+    espnow_data[0] = type;
+    memcpy(&espnow_data[1], config->data, config->data_len);
+
+    // Create new config structure for sending
+    esp_now_switch_channel_t *espnow_switch_channel_config = malloc(sizeof(esp_now_switch_channel_t) + espnow_data_len);
+    if (!espnow_switch_channel_config) {
+        return ESP_ERR_NO_MEM;
+    }
+
+    // Copy original configuration
+    memcpy(espnow_switch_channel_config, config, sizeof(esp_now_switch_channel_t));
+
+    // Update data length and data content
+    espnow_switch_channel_config->data_len = espnow_data_len;
+    memcpy(espnow_switch_channel_config->data, espnow_data, espnow_data_len);
+
+    esp_err_t ret = esp_now_switch_channel_tx(espnow_switch_channel_config);
+
+    if (del_peer) {
+        esp_now_del_peer(espnow_switch_channel_config->dest_mac);
+    }
+
+    free(espnow_switch_channel_config);
+
+    return ret;
+}
+#endif
 
 esp_err_t esp_mesh_lite_espnow_init(void)
 {
