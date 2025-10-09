@@ -13,18 +13,14 @@ if (CONFIG_MESH_LITE_WIRELESS_DEBUG)
     list(APPEND srcs "src/esp_mesh_lite_wireless_debug.c")
 endif()
 
-# Apply ESP-IDF Patch
-if(IDF_VERSION_MAJOR EQUAL 5 AND IDF_VERSION_MINOR EQUAL 5)
-    execute_process(COMMAND
-                    git apply ${CMAKE_CURRENT_LIST_DIR}/patches/lwip_kconfig_v5.5.patch
-                    WORKING_DIRECTORY $ENV{IDF_PATH})
-    message(STATUS "Apply ESP-IDF Patch: lwip_kconfig_v5.5.patch")
-else()
-    execute_process(COMMAND
-                    git apply ${CMAKE_CURRENT_LIST_DIR}/patches/lwip_kconfig_below_v5.5.patch
-                    WORKING_DIRECTORY $ENV{IDF_PATH})
-    message(STATUS "Apply ESP-IDF Patch: lwip_kconfig_below_v5.5.patch")
-endif()
+# Include patch utilities for reusable functions
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/patch_utils.cmake)
+
+# Apply patches using the utility function
+apply_patches_from_list(
+    PATCHES_LIST_FILE "${CMAKE_CURRENT_LIST_DIR}/patches/patches.list"
+    PATCH_BASE_DIR "${CMAKE_CURRENT_LIST_DIR}/patches"
+)
 
 set(package_version "")
 set(yml_file "${CMAKE_CURRENT_LIST_DIR}/idf_component.yml")
