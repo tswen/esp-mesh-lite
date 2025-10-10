@@ -12,6 +12,10 @@
 
 - Fixed the issue where devices that have already reached the maximum level could still be connected as parent nodes when different nodes have inconsistent max_level settings  ([25473c8](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/25473c8c67554704b9f11d0f814a8618c5f17eb3))
 
+### Enhancements:
+
+- Optimize patch workflow and implement more precise patch management ([b811d9c](https://glab.espressif.cn/solutions/esp-mesh-lite/esp-mesh-lite/-/commit/b811d9c3564ba08455dd938892e8b21b2b726184))
+
 ## v2.0.0 - 2025-9-10
 
 ### Breaking Change:
