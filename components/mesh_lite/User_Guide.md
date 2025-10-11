@@ -46,8 +46,8 @@ ESP-Mesh-Lite is supported by various Espressif chips, as shown in the table bel
 | ESP32-S3 | ![alt text][supported] | ![alt text][supported] | ![alt text][supported] | ![alt text][supported] | ![alt text][supported] |
 | ESP32-C2 | ![alt text][supported] | ![alt text][supported] | ![alt text][supported] | ![alt text][supported] | ![alt text][supported] |
 | ESP32-C6 | ![alt text][supported] | ![alt text][supported] | ![alt text][supported] | ![alt text][supported] | ![alt text][supported] |
-| ESP32-C5 |                        |                        |                        | ![alt text][supported] | ![alt text][supported] |
-| ESP32-C61|                        |                        |                        | ![alt text][supported] | ![alt text][supported] |
+| ESP32-C5 |                        |                        |                        |                        | ![alt text][supported] |
+| ESP32-C61|                        |                        |                        |                        | ![alt text][supported] |
 
 [supported]: https://img.shields.io/badge/-supported-green "supported"
 
