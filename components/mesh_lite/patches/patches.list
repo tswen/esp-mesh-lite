@@ -1,0 +1,7 @@
+[lwip_kconfig_below_v5.5.patch]
+    path = esp-idf
+    idf_version < 5.5
+
+[lwip_kconfig_v5.5.patch]
+    path = esp-idf
+    idf_version >= 5.5
