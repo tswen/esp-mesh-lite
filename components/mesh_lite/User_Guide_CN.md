@@ -46,8 +46,8 @@ ESP-MESH-LITE 是一套建立在 Wi-Fi 协议之上的网络协议。ESP-MESH-LI
 | ESP32-S3 | ![alt text][supported] | ![alt text][supported] | ![alt text][supported] | ![alt text][supported] | ![alt text][supported] |
 | ESP32-C2 | ![alt text][supported] | ![alt text][supported] | ![alt text][supported] | ![alt text][supported] | ![alt text][supported] |
 | ESP32-C6 | ![alt text][supported] | ![alt text][supported] | ![alt text][supported] | ![alt text][supported] | ![alt text][supported] |
-| ESP32-C5 |                        |                        |                        | ![alt text][supported] | ![alt text][supported] |
-| ESP32-C61|                        |                        |                        | ![alt text][supported] | ![alt text][supported] |
+| ESP32-C5 |                        |                        |                        |                        | ![alt text][supported] |
+| ESP32-C61|                        |                        |                        |                        | ![alt text][supported] |
 
 [supported]: https://img.shields.io/badge/-%E6%94%AF%E6%8C%81-green "supported"
 
