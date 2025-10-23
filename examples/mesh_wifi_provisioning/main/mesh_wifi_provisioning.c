@@ -170,6 +170,10 @@ static esp_err_t esp_storage_init(void)
 
 static void wifi_init(void)
 {
+    wifi_config_t wifi_sta_config;
+    memset(&wifi_sta_config, 0x0, sizeof(wifi_config_t));
+    esp_bridge_wifi_set_config(WIFI_IF_STA, &wifi_sta_config);
+
     wifi_config_t wifi_softap_config = {
         .ap = {
             .ssid = CONFIG_BRIDGE_SOFTAP_SSID,
@@ -211,12 +215,33 @@ void app_wifi_set_softap_info(void)
     esp_mesh_lite_set_softap_info(softap_ssid, softap_psw);
 }
 
+uint8_t test[6] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
+
+#include "iot_button.h"
+#define BUTTON_NUM            1
+#define BUTTON_SW1            9
+static button_handle_t g_btns[BUTTON_NUM] = { 0 };
+
+static void button_press_up_cb(void *hardware_data, void *usr_data)
+{
+    ESP_LOGI(TAG, "BTN: BUTTON_PRESS_UP");
+
+    zero_provision_set_customer_data(test, 6);
+}
+
+esp_err_t zero_prov_cust_data_validation(uint8_t *cust_data, size_t cust_data_len)
+{
+    ESP_LOG_BUFFER_HEXDUMP("APP Cust data Recv", cust_data, cust_data_len, ESP_LOG_WARN);
+
+    return ESP_OK;
+}
+
 void app_main()
 {
     /**
      * @brief Set the log level for serial port printing.
      */
-    esp_log_level_set("*", ESP_LOG_INFO);
+    // esp_log_level_set("*", ESP_LOG_INFO);
 
     esp_storage_init();
 
@@ -235,7 +260,7 @@ void app_main()
     esp_mesh_lite_start();
 
 #if defined(CONFIG_MESH_LITE_PROV_ENABLE)
-    zero_prov_init(NULL, NULL);
+    zero_prov_init(NULL, 0);
 #endif
 
 #if defined(CONFIG_MESH_LITE_PROV_TRANSPORT_BLE)
@@ -247,7 +272,23 @@ void app_main()
      */
     ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &ip_event_sta_got_ip_handler, NULL, NULL));
 
-    TimerHandle_t timer = xTimerCreate("print_system_info", 10000 / portTICK_PERIOD_MS,
+    esp_mesh_lite_fusion_config_t fusion_config = {
+        .fusion_frequency_sec = 20,   // Set the network to perform fusion every 120 seconds thereafter.
+    };
+    // Apply the fusion configuration to the mesh network.
+    esp_mesh_lite_set_fusion_config(&fusion_config);
+
+    TimerHandle_t timer = xTimerCreate("print_system_info", 2000 / portTICK_PERIOD_MS,
                                        true, NULL, print_system_info_timercb);
     xTimerStart(timer, 0);
+
+    button_config_t cfg = {
+        .type = BUTTON_TYPE_GPIO,
+        .gpio_button_config = {
+            .gpio_num = BUTTON_SW1,
+            .active_level = 0,
+        },
+    };
+    g_btns[0] = iot_button_create(&cfg);
+    iot_button_register_cb(g_btns[0], BUTTON_PRESS_UP, button_press_up_cb, 0);
 }

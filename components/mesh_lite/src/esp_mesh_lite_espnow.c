@@ -157,6 +157,8 @@ esp_err_t esp_mesh_lite_espnow_switch_channel_send(uint8_t type, esp_now_switch_
         return ESP_ERR_NO_MEM;
     }
 
+    ESP_LOGW(TAG, "switch %d to send espnow data to "MACSTR"", config->channel, MAC2STR(config->dest_mac));
+
     // Copy original configuration
     memcpy(espnow_switch_channel_config, config, sizeof(esp_now_switch_channel_t));
 
