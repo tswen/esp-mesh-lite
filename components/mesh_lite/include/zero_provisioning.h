@@ -1,18 +1,21 @@
 /*
- * SPDX-FileCopyrightText: 2022-2024 Espressif Systems (Shanghai) CO LTD
+ * SPDX-FileCopyrightText: 2022-2025 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#pragma once
+
+#if CONFIG_MESH_LITE_PROV_ENABLE
+
 #include "esp_now.h"
 #include "sdkconfig.h"
 #include "esp_mesh_lite_espnow.h"
-
-#ifndef zero_prov_H
-#define zero_prov_H
+#include <stddef.h>
 
 #define ZERO_PROV_DEBUG                (0)
 #define ZERO_PROV_QUEUE_SIZE           (100)
+#define ZERO_PROV_CUST_DATA_MAX_LEN    (1000)
 #define ZERO_PROV_LISTENING_TIMEOUT    CONFIG_ZERO_PROV_LISTENING_TIMEOUT
 #define ZERO_PROV_ERR_CHECK(a, str, ret) if(!(a)) { \
         ESP_LOGE(TAG,"%s:%d (%s):%s", __FILE__, __LINE__, __FUNCTION__, str); \
@@ -23,6 +26,7 @@
         esp_err_t err = (func_call); \
         if (err == ESP_FAIL) { \
             ESP_LOGW(TAG, "%s %d %s failed with error: %d", __func__, __LINE__, #func_call, err); \
+            return; \
         } \
     } while (0)
 
@@ -62,16 +66,23 @@ typedef struct {
 } zero_prov_unicast_data_t;
 
 typedef struct {
-    char cust_data[CONFIG_CUSTOMER_DATA_LENGTH];
-    char device_info[CONFIG_DEVICE_INFO_LENGTH];
+    uint8_t channel;
+    uint16_t cust_data_len;
+    uint8_t cust_data[0];
 } zero_prov_idle_node_data_t;
 
 typedef struct {
     uint8_t type;
-    uint8_t len;
+    uint16_t len;
     uint16_t crc;
     uint8_t payload[0];
 } zero_prov_esp_now_data_t;
+
+/* Calculate offset to any field in zero_prov_esp_now_data_t structure */
+#define ZERO_PROV_OFFSETOF(field)  offsetof(zero_prov_esp_now_data_t, field)
+
+/* Calculate header size (offset to payload field) for backward compatibility */
+#define ZERO_PROV_ESP_NOW_HEADER_SIZE  ZERO_PROV_OFFSETOF(payload)
 
 /**
  * @brief Initialize the Zero Provisioning module with customer-specific data and device information.
@@ -79,13 +90,33 @@ typedef struct {
  * This function initializes the Zero Provisioning module with the provided customer-specific data
  * and device information.
  *
- * @param[in] cust_data Pointer to the customer-specific data buffer.
- * @param[in] device_info Pointer to the device information data buffer.
+ * @param[in] cust_data Pointer to the buffer containing custom user data (payload can be node ID or additional info).
+ * @param[in] cust_data_len Length of the custom data in bytes.
  * @return
- *     - ESP_OK if initialization was successful.
- *     - ESP_FAIL if initialization failed, for example due to invalid parameters.
+ *     - ESP_OK: Initialization successful.
+ *     - ESP_ERR_INVALID_ARG: Invalid arguments.
+ *     - ESP_FAIL: Initialization failed for other reasons.
+ *
+ * @note The data pointed by cust_data will be copied internally. Only needs to be called once.
  */
-esp_err_t zero_prov_init(char *cust_data, char *device_info);
+esp_err_t zero_prov_init(uint8_t *cust_data, size_t cust_data_len);
+
+/**
+ * @brief Set or update the custom user data broadcast during Zero Provisioning, at runtime.
+ *
+ * This function allows updating the custom customer data that will be broadcast or used during the zero provisioning process.
+ * It can be called after zero_prov_init to dynamically change the custom data being sent.
+ *
+ * @param[in] cust_data Pointer to the new custom user data buffer.
+ * @param[in] cust_data_len Length of the new custom user data (max 255).
+ * @return
+ *     - ESP_OK: Data set successfully.
+ *     - ESP_ERR_INVALID_ARG: Invalid arguments.
+ *     - ESP_FAIL: Set failed.
+ *
+ * @note If called after zero_prov_init, it will update the broadcast payload in real time.
+ */
+esp_err_t zero_provision_set_customer_data(uint8_t *cust_data, size_t cust_data_len);
 
 /**
  * @brief Start the device in listening mode for Zero Provisioning to allow unconfigured devices

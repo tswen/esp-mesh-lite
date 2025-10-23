@@ -226,14 +226,6 @@ menu "ESP Wi-Fi Mesh Lite"
                 The time in seconds for which the device will wait for provisioning to complete.
                 If the device is not provisioned within this time, the device will exit provisioning mode.
 
-        config CUSTOMER_DATA_LENGTH
-            int "Customer data length"
-            default 40
-
-        config DEVICE_INFO_LENGTH
-            int "Device information length"
-            default 40
-
         config ZERO_PROV_LISTENING_TIMEOUT
             int "Zero Provisioning listening timeout"
             default 360
