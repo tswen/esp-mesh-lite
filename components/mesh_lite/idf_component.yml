@@ -10,7 +10,7 @@ dependencies:
   iot_bridge:
     path: components/iot_bridge
     git: https://github.com/espressif/esp-iot-bridge.git
-    version: 457185f8
+    version: c71fc45
   espressif/cmake_utilities: 0.*
 examples:
   - path: ../../examples/mesh_local_control

@@ -898,6 +898,20 @@ esp_err_t wifi_prov_mgr_done(void)
     return ESP_OK;
 }
 
+__attribute__((weak)) void before_wifi_provisioning_scan(void)
+{
+    // This is a weak implementation, acting as a virtual function.
+    // Users can override this function elsewhere.
+    return;
+}
+
+__attribute__((weak)) void wifi_provisioning_scan_done(void)
+{
+    // This is a weak implementation, acting as a virtual function.
+    // Users can override this function elsewhere.
+    return;
+}
+
 static esp_err_t update_wifi_scan_results(void)
 {
     if (!prov_ctx->scanning) {
@@ -1001,6 +1015,9 @@ exit:
 
     ESP_LOGD(TAG, "Scan starting on channel %u...", curr_channel);
     prov_ctx->scan_cfg.channel = curr_channel;
+
+    before_wifi_provisioning_scan();
+
     ret = esp_wifi_scan_start(&prov_ctx->scan_cfg, false);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to start scan");
@@ -1010,6 +1027,10 @@ exit:
     ESP_LOGD(TAG, "Scan started");
 
 final:
+
+    if (prov_ctx->scanning == false) {
+        wifi_provisioning_scan_done();
+    }
 
     return ret;
 }
@@ -1175,7 +1196,10 @@ esp_err_t wifi_prov_mgr_wifi_scan_start(bool blocking, bool passive,
         prov_ctx->scan_cfg.channel = 0;
     }
 
+    before_wifi_provisioning_scan();
+
     if (esp_wifi_scan_start(&prov_ctx->scan_cfg, false) != ESP_OK) {
+        wifi_provisioning_scan_done();
         ESP_LOGE(TAG, "Failed to start scan");
         RELEASE_LOCK(prov_ctx_lock);
         return ESP_FAIL;
